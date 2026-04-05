@@ -1,0 +1,199 @@
+import React from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Dimensions,
+  ActivityIndicator,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { COLORS } from "../constants";
+import { globalStyles } from "../styles";
+
+const { width } = Dimensions.get("window");
+
+function ScoreRing({ score }) {
+  const color =
+    score >= 80 ? COLORS.green : score >= 60 ? COLORS.yellow : COLORS.red;
+  return (
+    <View style={[globalStyles.scoreRing, { borderColor: color }]}>
+      <Text style={[globalStyles.scoreNumber, { color }]}>{score}</Text>
+      <Text style={globalStyles.scoreLabel}>Overall Score</Text>
+    </View>
+  );
+}
+
+function ScoreCard({ icon, label, value, color }) {
+  return (
+    <View style={globalStyles.scoreCard}>
+      <Text style={globalStyles.scoreCardIcon}>{icon}</Text>
+      <Text
+        style={[globalStyles.scoreCardValue, { color: color || COLORS.green }]}
+      >
+        {value}
+      </Text>
+      <Text style={globalStyles.scoreCardLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function VitalRow({ label, value, status, color }) {
+  return (
+    <View style={globalStyles.vitalRow}>
+      <View>
+        <Text style={globalStyles.vitalLabel}>{label}</Text>
+        <Text style={[globalStyles.vitalValue, { color }]}>{value}</Text>
+      </View>
+      <View
+        style={[globalStyles.vitalBadge, { backgroundColor: color + "22" }]}
+      >
+        <Text style={[globalStyles.vitalBadgeText, { color }]}>{status}</Text>
+      </View>
+    </View>
+  );
+}
+
+export default function ResultsScreen({ navigation, analysisHook }) {
+  const { result, loading } = analysisHook;
+
+  if (loading) {
+    return (
+      <View style={globalStyles.empty}>
+        <ActivityIndicator color={COLORS.primary} size="large" />
+        <Text style={[globalStyles.emptyText, { marginTop: 16 }]}>
+          Analyzing...
+        </Text>
+      </View>
+    );
+  }
+
+  if (!result?.seo) {
+    return (
+      <View style={globalStyles.empty}>
+        <Text style={globalStyles.emptyText}>No results yet</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={globalStyles.backLink}>← Go back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const { seo } = result;
+  const score = seo.score || 0;
+  const tech = seo.technical || {};
+  const vitals = seo.coreWebVitals || {};
+  const issues = seo.issues || [];
+
+  const lcpVal = vitals.lcp?.displayValue || "--";
+  const lcpScore = vitals.lcp?.score || 0;
+  const clsVal = vitals.cls?.displayValue || "--";
+  const clsScore = vitals.cls?.score || 0;
+  const inpVal = vitals.inp?.displayValue || vitals.fid?.displayValue || "--";
+
+  const getColor = (s) =>
+    s >= 75 ? COLORS.green : s >= 50 ? COLORS.yellow : COLORS.red;
+  const getStatus = (s) => (s >= 75 ? "Good" : s >= 50 ? "Fair" : "Poor");
+
+  return (
+    <ScrollView
+      style={globalStyles.container}
+      contentContainerStyle={globalStyles.inner}
+    >
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={globalStyles.back}
+      >
+        <Text style={globalStyles.backText}>← New Analysis</Text>
+      </TouchableOpacity>
+
+      <Text style={globalStyles.urlText}>{result.url}</Text>
+
+      <View style={globalStyles.ringWrap}>
+        <ScoreRing score={score} />
+      </View>
+
+      <View style={globalStyles.cardGrid}>
+        <ScoreCard
+          icon="🚀"
+          label="Performance"
+          value={`${tech.performance || "--"}%`}
+          color={getColor(tech.performance || 0)}
+        />
+        <ScoreCard
+          icon="📱"
+          label="Mobile"
+          value={`${tech.mobile || "--"}%`}
+          color={getColor(tech.mobile || 0)}
+        />
+        <ScoreCard
+          icon="⚡"
+          label="Speed"
+          value={`${tech.speed || "--"}%`}
+          color={getColor(tech.speed || 0)}
+        />
+        <ScoreCard
+          icon="🔒"
+          label="Security"
+          value={`${tech.security || "--"}%`}
+          color={COLORS.purple}
+        />
+      </View>
+
+      <View style={globalStyles.section}>
+        <Text style={globalStyles.sectionTitle}>Core Web Vitals</Text>
+        <View style={globalStyles.vitalsCard}>
+          <VitalRow
+            label="Largest Contentful Paint"
+            value={lcpVal}
+            status={getStatus(lcpScore)}
+            color={getColor(lcpScore)}
+          />
+          <View style={globalStyles.divider} />
+          <VitalRow
+            label="Cumulative Layout Shift"
+            value={clsVal}
+            status={getStatus(clsScore)}
+            color={getColor(clsScore)}
+          />
+          <View style={globalStyles.divider} />
+          <VitalRow
+            label="Interaction to Next Paint"
+            value={inpVal}
+            status="Good"
+            color={COLORS.green}
+          />
+        </View>
+      </View>
+
+      {issues.length > 0 && (
+        <View style={globalStyles.section}>
+          <Text style={globalStyles.sectionTitle}>
+            Priority Recommendations
+          </Text>
+          {issues.map((issue, i) => (
+            <View key={i} style={globalStyles.issueCard}>
+              <View style={globalStyles.issueNum}>
+                <Text style={globalStyles.issueNumText}>{i + 1}</Text>
+              </View>
+              <Text style={globalStyles.issueText}>{issue}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {result.social && (
+        <TouchableOpacity onPress={() => navigation.navigate("Social")}>
+          <LinearGradient
+            colors={["#7c3aed", "#db2777"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={globalStyles.socialBtnGrad}
+          >
+            <Text style={globalStyles.socialBtnText}>View Social Report →</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      )}
+    </ScrollView>
+  );
+}

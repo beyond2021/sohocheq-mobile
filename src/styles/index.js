@@ -1,0 +1,229 @@
+import { StyleSheet, Dimensions } from "react-native";
+import { COLORS } from "../constants";
+
+const { width, height } = Dimensions.get("window");
+
+export const globalStyles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: COLORS.background },
+  inner: { padding: 20, paddingTop: 60, paddingBottom: 40 },
+
+  // Logo
+  logoWrap: { alignItems: "center", marginBottom: 40 },
+  //   logoImage: { width: 200, height: 80 },
+  //   headerLogo: { width: 120, height: 48 },
+  logoImage: { width: width * 0.55, height: height * 0.08 },
+  headerLogo: { width: width * 0.35, height: height * 0.06 },
+
+  // Typography
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  subtitle: { fontSize: 15, color: COLORS.textMuted, marginBottom: 32 },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: COLORS.text,
+    marginBottom: 14,
+  },
+  sectionLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: COLORS.textMuted,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 12,
+  },
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: COLORS.primary,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    marginBottom: 8,
+  },
+
+  // Inputs
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: COLORS.textMuted,
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  input: {
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+
+  // Buttons
+  btnWrap: { marginTop: 8 },
+  btn: { borderRadius: 14, padding: 18, alignItems: "center" },
+  btnDisabled: { opacity: 0.5 },
+  btnText: { color: "#fff", fontSize: 17, fontWeight: "800" },
+
+  // Cards
+  card: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  cardGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    marginBottom: 32,
+  },
+  scoreCard: {
+    width: (width - 52) / 2,
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 16,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+
+  // Tabs
+  tabs: {
+    flexDirection: "row",
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 28,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  tab: { flex: 1, paddingVertical: 8, alignItems: "center", borderRadius: 10 },
+  tabActive: { backgroundColor: COLORS.primary },
+  tabText: { fontSize: 13, color: COLORS.textMuted, fontWeight: "600" },
+  tabTextActive: { color: "#fff" },
+
+  // Avatar
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarText: { color: "#fff", fontWeight: "800", fontSize: 14 },
+
+  // Misc
+  divider: { height: 1, backgroundColor: COLORS.border },
+  error: {
+    color: COLORS.red,
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  ticker: {
+    marginTop: 20,
+    fontSize: 11,
+    color: COLORS.textFaint,
+    textAlign: "center",
+  },
+  linkRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  linkText: { color: COLORS.text, fontSize: 15 },
+  linkChevron: { color: COLORS.textMuted, fontSize: 16 },
+
+  // Add these to globalStyles:
+  empty: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: { color: COLORS.textMuted, fontSize: 16, marginBottom: 16 },
+  backLink: { color: COLORS.primary, fontSize: 15 },
+  back: { marginBottom: 12 },
+  backText: { color: COLORS.primary, fontSize: 14, fontWeight: "600" },
+  urlText: { fontSize: 13, color: COLORS.textMuted, marginBottom: 24 },
+  ringWrap: { alignItems: "center", marginBottom: 32 },
+  scoreRing: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.surface,
+  },
+  scoreNumber: { fontSize: 44, fontWeight: "900" },
+  scoreLabel: { fontSize: 11, color: COLORS.textMuted, fontWeight: "600" },
+  scoreCardIcon: { fontSize: 24, marginBottom: 8 },
+  scoreCardValue: { fontSize: 28, fontWeight: "900", marginBottom: 4 },
+  scoreCardLabel: { fontSize: 12, color: COLORS.textMuted, fontWeight: "600" },
+  vitalsCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  vitalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  vitalLabel: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  vitalValue: { fontSize: 26, fontWeight: "900" },
+  vitalBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 100 },
+  vitalBadgeText: { fontSize: 11, fontWeight: "700" },
+  issueCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: COLORS.surface,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.primary,
+  },
+  issueNum: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: COLORS.primary + "33",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+    marginTop: 2,
+  },
+  issueNumText: { color: COLORS.primary, fontWeight: "800", fontSize: 12 },
+  issueText: { flex: 1, color: COLORS.text, fontSize: 14, lineHeight: 20 },
+  socialBtnGrad: { borderRadius: 14, padding: 16, alignItems: "center" },
+  socialBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+});
