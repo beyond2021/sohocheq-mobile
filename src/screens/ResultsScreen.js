@@ -4,14 +4,11 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
   ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants";
 import { globalStyles } from "../styles";
-
-const { width } = Dimensions.get("window");
 
 function ScoreRing({ score }) {
   const color =
@@ -182,15 +179,32 @@ export default function ResultsScreen({ navigation, analysisHook }) {
         </View>
       )}
 
+      <TouchableOpacity
+        onPress={() => navigation.navigate("AIAdvisor")}
+        style={globalStyles.btnWrap}
+      >
+        <LinearGradient
+          colors={["#7c3aed", "#db2777"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={globalStyles.btn}
+        >
+          <Text style={globalStyles.btnText}>🤖 AI Social Advisor →</Text>
+        </LinearGradient>
+      </TouchableOpacity>
+
       {result.social && (
-        <TouchableOpacity onPress={() => navigation.navigate("Social")}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Social")}
+          style={[globalStyles.btnWrap, { marginTop: 12 }]}
+        >
           <LinearGradient
             colors={["#7c3aed", "#db2777"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
-            style={globalStyles.socialBtnGrad}
+            style={globalStyles.btn}
           >
-            <Text style={globalStyles.socialBtnText}>View Social Report →</Text>
+            <Text style={globalStyles.btnText}>View Social Report →</Text>
           </LinearGradient>
         </TouchableOpacity>
       )}

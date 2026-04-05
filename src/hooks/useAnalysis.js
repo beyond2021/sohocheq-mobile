@@ -8,6 +8,7 @@ export function useAnalysis() {
   const [progress, setProgress] = useState(0);
 
   const analyze = async ({ url, twitter, instagram, tiktok, youtube }) => {
+    console.log("🔍 Starting analysis for:", url);
     setLoading(true);
     setError(null);
     setResult(null);
@@ -27,10 +28,14 @@ export function useAnalysis() {
         body: JSON.stringify({ url: cleanUrl }),
       });
 
+      console.log("📊 SEO response status:", seoRes.status);
+      const seoData = await seoRes.json();
+      console.log("📊 SEO data:", JSON.stringify(seoData));
+
       setProgress(60);
 
       if (!seoRes.ok) throw new Error("SEO analysis failed");
-      const seoData = await seoRes.json();
+      // const seoData = await seoRes.json();
 
       setProgress(80);
 

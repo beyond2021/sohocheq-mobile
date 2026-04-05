@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Image } from "react-native";
-import { globalStyles } from '../styles';
+import { globalStyles } from "../styles";
 
 import {
   View,

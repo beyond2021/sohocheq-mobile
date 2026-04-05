@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,21 +15,26 @@ import { COLORS } from "../constants";
 
 export default function HomeScreen({ navigation, analysisHook, authHook }) {
   const [url, setUrl] = useState("");
-  const [tab, setTab] = useState("hybrid"); // hybrid | website | social
+  const [tab, setTab] = useState("hybrid");
   const [twitter, setTwitter] = useState("");
   const [instagram, setInstagram] = useState("");
   const [tiktok, setTiktok] = useState("");
   const [youtube, setYoutube] = useState("");
 
-  const { analyze, loading, error } = analysisHook;
-  const { user, isPremium } = authHook;
+  const { analyze, loading, result, error } = analysisHook;
+  const { user } = authHook;
 
-  const handleAnalyze = async () => {
+  useEffect(() => {
+    if (result) {
+      navigation.navigate("Results");
+    }
+  }, [result]);
+
+  const handleAnalyze = () => {
     if (!url.trim()) return;
     const handles =
       tab === "website" ? {} : { twitter, instagram, tiktok, youtube };
-    await analyze({ url, ...handles });
-    navigation.navigate("ResultsScreen");
+    analyze({ url, ...handles });
   };
 
   const tabs = [
@@ -47,7 +52,6 @@ export default function HomeScreen({ navigation, analysisHook, authHook }) {
         contentContainerStyle={styles.inner}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header */}
         <View style={styles.header}>
           <View>
             <Text style={styles.logoSub}>SOH·O</Text>
@@ -65,14 +69,12 @@ export default function HomeScreen({ navigation, analysisHook, authHook }) {
           )}
         </View>
 
-        {/* Greeting */}
         {user && (
           <Text style={styles.greeting}>
             Hey {user.email?.split("@")[0]} 👋
           </Text>
         )}
 
-        {/* Tabs */}
         <View style={styles.tabs}>
           {tabs.map((t) => (
             <TouchableOpacity
@@ -89,7 +91,6 @@ export default function HomeScreen({ navigation, analysisHook, authHook }) {
           ))}
         </View>
 
-        {/* Hero */}
         <View style={styles.hero}>
           <Text style={styles.eyebrow}>
             {tab === "hybrid"
@@ -110,7 +111,6 @@ export default function HomeScreen({ navigation, analysisHook, authHook }) {
           </Text>
         </View>
 
-        {/* URL Input */}
         {tab !== "social" && (
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Website URL</Text>
@@ -127,7 +127,6 @@ export default function HomeScreen({ navigation, analysisHook, authHook }) {
           </View>
         )}
 
-        {/* Social Handles */}
         {tab !== "website" && (
           <View style={styles.socialGrid}>
             <View style={styles.socialField}>
@@ -183,7 +182,6 @@ export default function HomeScreen({ navigation, analysisHook, authHook }) {
 
         {error && <Text style={styles.error}>{error}</Text>}
 
-        {/* Analyze Button */}
         <TouchableOpacity
           onPress={handleAnalyze}
           disabled={loading || !url.trim()}
@@ -203,7 +201,6 @@ export default function HomeScreen({ navigation, analysisHook, authHook }) {
           </LinearGradient>
         </TouchableOpacity>
 
-        {/* Keyword ticker */}
         <Text style={styles.ticker}>
           Social media earnings calculator · Influencer earnings per post
         </Text>

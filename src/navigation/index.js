@@ -5,6 +5,7 @@ import AuthScreen from "../screens/AuthScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ResultsScreen from "../screens/ResultsScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import AIAdvisorScreen from "../screens/AIAdvisorScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +39,11 @@ export default function Navigation({ authHook, analysisHook }) {
             </Stack.Screen>
             <Stack.Screen name="Settings">
               {(props) => <SettingsScreen {...props} authHook={authHook} />}
+            </Stack.Screen>
+            <Stack.Screen name="AIAdvisor">
+              {(props) => (
+                <AIAdvisorScreen {...props} analysisHook={analysisHook} />
+              )}
             </Stack.Screen>
           </>
         )}

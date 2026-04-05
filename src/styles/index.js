@@ -226,4 +226,156 @@ export const globalStyles = StyleSheet.create({
   issueText: { flex: 1, color: COLORS.text, fontSize: 14, lineHeight: 20 },
   socialBtnGrad: { borderRadius: 14, padding: 16, alignItems: "center" },
   socialBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+
+  // Layout
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  inner: { padding: 20, paddingTop: 60, paddingBottom: 40 },
+
+  // Logo
+  logoSub: { fontSize: 9, color: COLORS.textMuted, letterSpacing: 3 },
+  logo: { fontSize: 28, fontWeight: "900", color: COLORS.text },
+
+  // Greeting
+  greeting: { fontSize: 15, color: COLORS.textMuted, marginBottom: 20 },
+
+  // Hero
+  hero: { marginBottom: 28 },
+  heroTitle: {
+    fontSize: 32,
+    fontWeight: "900",
+    color: COLORS.text,
+    lineHeight: 38,
+    marginBottom: 10,
+  },
+  heroSub: { fontSize: 14, color: COLORS.textMuted, lineHeight: 20 },
+
+  // Social
+  socialGrid: { gap: 12, marginBottom: 16 },
+  socialField: {},
+
+  // Ticker
+  ticker: {
+    marginTop: 20,
+    fontSize: 11,
+    color: COLORS.textFaint,
+    textAlign: "center",
+  },
+
+  authInner: { flexGrow: 1, justifyContent: "center", padding: 24 },
+  logoWrap: { alignItems: "center", marginBottom: 40 },
+  form: { gap: 12 },
+  label: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: COLORS.textMuted,
+    marginBottom: 4,
+  },
+  switchBtn: { alignItems: "center", marginTop: 16 },
+  switchText: { color: COLORS.primary, fontSize: 14 },
+
+  // Results
+  urlText: { fontSize: 13, color: COLORS.textMuted, marginBottom: 24 },
+  ringWrap: { alignItems: "center", marginBottom: 32 },
+  scoreRing: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.surface,
+  },
+  scoreNumber: { fontSize: 44, fontWeight: "900" },
+  scoreLabel: { fontSize: 11, color: COLORS.textMuted, fontWeight: "600" },
+  scoreCard: {
+    width: (width - 52) / 2,
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 16,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  scoreCardIcon: { fontSize: 24, marginBottom: 8 },
+  scoreCardValue: { fontSize: 28, fontWeight: "900", marginBottom: 4 },
+  scoreCardLabel: { fontSize: 12, color: COLORS.textMuted, fontWeight: "600" },
+
+  // Vitals
+  vitalsCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  vitalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  vitalLabel: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  vitalValue: { fontSize: 26, fontWeight: "900" },
+  vitalBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 100 },
+  vitalBadgeText: { fontSize: 11, fontWeight: "700" },
+
+  // Issues
+  issueCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: COLORS.surface,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.primary,
+  },
+  issueNum: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: COLORS.primary + "33",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+    marginTop: 2,
+  },
+  issueNumText: { color: COLORS.primary, fontWeight: "800", fontSize: 12 },
+  issueText: { flex: 1, color: COLORS.text, fontSize: 14, lineHeight: 20 },
+
+  // Shared
+  empty: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: { color: COLORS.textMuted, fontSize: 16, marginBottom: 16 },
+  backLink: { color: COLORS.primary, fontSize: 15 },
+  back: { marginBottom: 12 },
+  backText: { color: COLORS.primary, fontSize: 14, fontWeight: "600" },
+  section: { marginBottom: 28 },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: COLORS.text,
+    marginBottom: 14,
+  },
+  divider: { height: 1, backgroundColor: COLORS.border },
+  socialBtnGrad: { borderRadius: 14, padding: 16, alignItems: "center" },
+  socialBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
 });
