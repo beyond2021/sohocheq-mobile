@@ -163,22 +163,6 @@ export default function ResultsScreen({ navigation, analysisHook }) {
         </View>
       </View>
 
-      {issues.length > 0 && (
-        <View style={globalStyles.section}>
-          <Text style={globalStyles.sectionTitle}>
-            Priority Recommendations
-          </Text>
-          {issues.map((issue, i) => (
-            <View key={i} style={globalStyles.issueCard}>
-              <View style={globalStyles.issueNum}>
-                <Text style={globalStyles.issueNumText}>{i + 1}</Text>
-              </View>
-              <Text style={globalStyles.issueText}>{issue}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
       <TouchableOpacity
         onPress={() => navigation.navigate("AIAdvisor")}
         style={globalStyles.btnWrap}

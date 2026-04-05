@@ -119,7 +119,7 @@ export default function HomeScreen({ navigation, analysisHook, authHook }) {
               placeholder="https://yourdomain.com"
               placeholderTextColor={COLORS.textFaint}
               value={url}
-              onChangeText={setUrl}
+              onChangeText={(text) => setUrl(text)}
               autoCapitalize="none"
               keyboardType="url"
               autoCorrect={false}

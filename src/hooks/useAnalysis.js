@@ -30,6 +30,7 @@ export function useAnalysis() {
 
       console.log("📊 SEO response status:", seoRes.status);
       const seoData = await seoRes.json();
+      console.log("SEO DATA:", JSON.stringify(seoData));
       console.log("📊 SEO data:", JSON.stringify(seoData));
 
       setProgress(60);
