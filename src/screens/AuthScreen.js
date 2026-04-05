@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Image } from "react-native";
 import { globalStyles } from "../styles";
 
 import {
   View,
   Text,
+  Image,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants";
+import { globalStyles } from "../styles";
 
 export default function AuthScreen({ navigation, route, authHook }) {
   const [mode, setMode] = useState(route?.params?.mode || "signin");
@@ -48,11 +49,11 @@ export default function AuthScreen({ navigation, route, authHook }) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={globalStyles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
-        contentContainerStyle={styles.inner}
+        contentContainerStyle={globalStyles.authInner}
         keyboardShouldPersistTaps="handled"
       >
         {/* Logo */}
@@ -64,19 +65,19 @@ export default function AuthScreen({ navigation, route, authHook }) {
           />
         </View>
 
-        <Text style={styles.title}>
+        <Text style={globalStyles.title}>
           {mode === "signin" ? "Welcome back" : "Create account"}
         </Text>
-        <Text style={styles.subtitle}>
+        <Text style={globalStyles.subtitle}>
           {mode === "signin"
             ? "Sign in to your account"
             : "Start your free trial today"}
         </Text>
 
-        <View style={styles.form}>
-          <Text style={styles.label}>Email</Text>
+        <View style={globalStyles.form}>
+          <Text style={globalStyles.label}>Email</Text>
           <TextInput
-            style={styles.input}
+            style={globalStyles.input}
             placeholder="you@example.com"
             placeholderTextColor={COLORS.textFaint}
             value={email}
@@ -86,9 +87,9 @@ export default function AuthScreen({ navigation, route, authHook }) {
             autoComplete="email"
           />
 
-          <Text style={styles.label}>Password</Text>
+          <Text style={globalStyles.label}>Password</Text>
           <TextInput
-            style={styles.input}
+            style={globalStyles.input}
             placeholder="••••••••"
             placeholderTextColor={COLORS.textFaint}
             value={password}
@@ -111,7 +112,7 @@ export default function AuthScreen({ navigation, route, authHook }) {
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.btnText}>
+                <Text style={globalStyles.btnText}>
                   {mode === "signin" ? "Sign In" : "Create Account"}
                 </Text>
               )}
@@ -120,9 +121,9 @@ export default function AuthScreen({ navigation, route, authHook }) {
 
           <TouchableOpacity
             onPress={() => setMode(mode === "signin" ? "signup" : "signin")}
-            style={styles.switchBtn}
+            style={globalStyles.switchBtn}
           >
-            <Text style={styles.switchText}>
+            <Text style={globalStyles.switchText}>
               {mode === "signin"
                 ? "Don't have an account? Sign up"
                 : "Already have an account? Sign in"}
