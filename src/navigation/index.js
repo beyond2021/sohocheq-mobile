@@ -167,7 +167,11 @@ export default function Navigation({ authHook, analysisHook }) {
             </Stack.Screen>
             <Stack.Screen name="Social">
               {(props) => (
-                <SocialScreen {...props} analysisHook={analysisHook} />
+                <SocialScreen
+                  {...props}
+                  authHook={authHook}
+                  analysisHook={analysisHook}
+                />
               )}
             </Stack.Screen>
           </>
