@@ -8,6 +8,7 @@ export function useAnalysis() {
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
+  const [step, setStep] = useState("");
 
   const getToken = async () => {
     try {
@@ -28,12 +29,14 @@ export function useAnalysis() {
     setError(null);
     setResult(null);
     setProgress(10);
+    setStep("Checking website speed...");
 
     try {
       let cleanUrl = url.trim();
       if (!cleanUrl.startsWith("http")) cleanUrl = "https://" + cleanUrl;
 
       setProgress(30);
+      setStep("Analyzing SEO score...");
 
       const token = await getToken();
       const authHeaders = {
@@ -59,15 +62,17 @@ export function useAnalysis() {
       );
 
       if (hasHandles) {
+        setStep("Calculating social reach...");
         socialData = {};
         const requests = [];
 
         if (instagram?.trim()) {
           requests.push(
-            fetch(
-              `${API_BASE}/instagram-data?username=${instagram.replace("@", "")}`,
-              { headers: authHeaders },
-            )
+            fetch(`${API_BASE}/instagram-data`, {
+              method: "POST",
+              headers: authHeaders,
+              body: JSON.stringify({ username: instagram.replace("@", "") }),
+            })
               .then((r) => {
                 console.log("📸 Instagram status:", r.status);
                 return r.ok ? r.json() : null;
@@ -87,10 +92,11 @@ export function useAnalysis() {
 
         if (twitter?.trim()) {
           requests.push(
-            fetch(
-              `${API_BASE}/twitter-data?username=${twitter.replace("@", "")}`,
-              { headers: authHeaders },
-            )
+            fetch(`${API_BASE}/twitter-data`, {
+              method: "POST",
+              headers: authHeaders,
+              body: JSON.stringify({ username: twitter.replace("@", "") }),
+            })
               .then((r) => {
                 console.log("𝕏 Twitter status:", r.status);
                 return r.ok ? r.json() : null;
@@ -110,13 +116,14 @@ export function useAnalysis() {
 
         if (tiktok?.trim()) {
           requests.push(
-            fetch(
-              `${API_BASE}/tiktok-data?username=${tiktok.replace("@", "")}`,
-              { headers: authHeaders },
-            )
+            fetch(`${API_BASE}/tiktok-data`, {
+              method: "POST",
+              headers: authHeaders,
+              body: JSON.stringify({ username: tiktok.replace("@", "") }),
+            })
               .then((r) => {
                 console.log("🎵 TikTok status:", r.status);
-                return r.ok ? (r.ok ? r.json() : null) : null;
+                return r.ok ? r.json() : null;
               })
               .then((data) => {
                 console.log("🎵 TikTok data:", JSON.stringify(data));
@@ -133,10 +140,11 @@ export function useAnalysis() {
 
         if (youtube?.trim()) {
           requests.push(
-            fetch(
-              `${API_BASE}/youtube-data?username=${youtube.replace("@", "")}`,
-              { headers: authHeaders },
-            )
+            fetch(`${API_BASE}/youtube-data`, {
+              method: "POST",
+              headers: authHeaders,
+              body: JSON.stringify({ username: youtube.replace("@", "") }),
+            })
               .then((r) => {
                 console.log("▶️ YouTube status:", r.status);
                 return r.ok ? r.json() : null;
@@ -160,6 +168,7 @@ export function useAnalysis() {
       }
 
       setProgress(100);
+      setStep("Analysis complete!");
       setResult({ seo: seoData, social: socialData, url: cleanUrl });
       setReady(true);
     } catch (e) {
@@ -174,7 +183,8 @@ export function useAnalysis() {
     setError(null);
     setProgress(0);
     setReady(false);
+    setStep("");
   };
 
-  return { analyze, loading, result, error, progress, reset, ready };
+  return { analyze, loading, result, error, progress, reset, ready, step };
 }

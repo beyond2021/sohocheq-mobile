@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
+  Image,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
@@ -39,10 +40,11 @@ export default function WebsiteScreen({ navigation, analysisHook, authHook }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={globalStyles.header}>
-          <View>
-            <Text style={globalStyles.logoSub}>SOH·O</Text>
-            <Text style={globalStyles.logo}>CHEQ</Text>
-          </View>
+          <Image
+            source={require("../../assets/logo.png")}
+            style={globalStyles.logoImage}
+            resizeMode="contain"
+          />
           {user && (
             <View style={globalStyles.avatar}>
               <Text style={globalStyles.avatarText}>
