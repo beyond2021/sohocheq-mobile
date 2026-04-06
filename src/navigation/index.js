@@ -16,6 +16,9 @@ import AIAdvisorScreen from "../screens/AIAdvisorScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const HybridStack = createNativeStackNavigator();
+const WebsiteStack = createNativeStackNavigator();
+const SocialStack = createNativeStackNavigator();
 
 function TabBar({ state, descriptors, navigation }) {
   const tabs = [
@@ -26,17 +29,15 @@ function TabBar({ state, descriptors, navigation }) {
   ];
 
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        backgroundColor: "#0d0d14",
-        borderTopWidth: 1,
-        borderTopColor: "rgba(255,255,255,0.08)",
-        paddingBottom: 24,
-        paddingTop: 10,
-        paddingHorizontal: 12,
-      }}
-    >
+    <View style={{
+      flexDirection: "row",
+      backgroundColor: "#0d0d14",
+      borderTopWidth: 1,
+      borderTopColor: "rgba(255,255,255,0.08)",
+      paddingBottom: 24,
+      paddingTop: 10,
+      paddingHorizontal: 12,
+    }}>
       {tabs.map((tab, index) => {
         const focused = state.index === index;
         return (
@@ -60,28 +61,14 @@ function TabBar({ state, descriptors, navigation }) {
                 }}
               >
                 <Text style={{ fontSize: 18 }}>{tab.icon}</Text>
-                <Text
-                  style={{
-                    fontSize: 10,
-                    fontWeight: "700",
-                    color: "#fff",
-                    marginTop: 2,
-                  }}
-                >
+                <Text style={{ fontSize: 10, fontWeight: "700", color: "#fff", marginTop: 2 }}>
                   {tab.label}
                 </Text>
               </LinearGradient>
             ) : (
               <View style={{ alignItems: "center", paddingVertical: 8 }}>
                 <Text style={{ fontSize: 18, opacity: 0.35 }}>{tab.icon}</Text>
-                <Text
-                  style={{
-                    fontSize: 10,
-                    fontWeight: "600",
-                    color: "rgba(255,255,255,0.35)",
-                    marginTop: 2,
-                  }}
-                >
+                <Text style={{ fontSize: 10, fontWeight: "600", color: "rgba(255,255,255,0.35)", marginTop: 2 }}>
                   {tab.label}
                 </Text>
               </View>
@@ -93,38 +80,66 @@ function TabBar({ state, descriptors, navigation }) {
   );
 }
 
-function MainTabs({ authHook, analysisHook }) {
+function HybridStackScreen({ authHook, hybridAnalysis }) {
+  return (
+    <HybridStack.Navigator screenOptions={{ headerShown: false }}>
+      <HybridStack.Screen name="HybridHome">
+        {(props) => <HybridScreen {...props} authHook={authHook} analysisHook={hybridAnalysis} />}
+      </HybridStack.Screen>
+      <HybridStack.Screen name="Results">
+        {(props) => <ResultsScreen {...props} analysisHook={hybridAnalysis} />}
+      </HybridStack.Screen>
+      <HybridStack.Screen name="AIAdvisor">
+        {(props) => <AIAdvisorScreen {...props} analysisHook={hybridAnalysis} />}
+      </HybridStack.Screen>
+    </HybridStack.Navigator>
+  );
+}
+
+function WebsiteStackScreen({ authHook, websiteAnalysis }) {
+  return (
+    <WebsiteStack.Navigator screenOptions={{ headerShown: false }}>
+      <WebsiteStack.Screen name="WebsiteHome">
+        {(props) => <WebsiteScreen {...props} authHook={authHook} analysisHook={websiteAnalysis} />}
+      </WebsiteStack.Screen>
+      <WebsiteStack.Screen name="Results">
+        {(props) => <ResultsScreen {...props} analysisHook={websiteAnalysis} />}
+      </WebsiteStack.Screen>
+      <WebsiteStack.Screen name="AIAdvisor">
+        {(props) => <AIAdvisorScreen {...props} analysisHook={websiteAnalysis} />}
+      </WebsiteStack.Screen>
+    </WebsiteStack.Navigator>
+  );
+}
+
+function SocialStackScreen({ authHook, socialAnalysis }) {
+  return (
+    <SocialStack.Navigator screenOptions={{ headerShown: false }}>
+      <SocialStack.Screen name="SocialHome">
+        {(props) => <SocialScreen {...props} authHook={authHook} analysisHook={socialAnalysis} />}
+      </SocialStack.Screen>
+      <SocialStack.Screen name="AIAdvisor">
+        {(props) => <AIAdvisorScreen {...props} analysisHook={socialAnalysis} />}
+      </SocialStack.Screen>
+    </SocialStack.Navigator>
+  );
+}
+
+function MainTabs({ authHook, hybridAnalysis, websiteAnalysis, socialAnalysis }) {
   return (
     <Tab.Navigator
       tabBar={(props) => <TabBar {...props} />}
       screenOptions={{ headerShown: false }}
+      backBehavior="history"
     >
       <Tab.Screen name="Hybrid">
-        {(props) => (
-          <HybridScreen
-            {...props}
-            authHook={authHook}
-            analysisHook={analysisHook}
-          />
-        )}
+        {(props) => <HybridStackScreen {...props} authHook={authHook} hybridAnalysis={hybridAnalysis} />}
       </Tab.Screen>
       <Tab.Screen name="Website">
-        {(props) => (
-          <WebsiteScreen
-            {...props}
-            authHook={authHook}
-            analysisHook={analysisHook}
-          />
-        )}
+        {(props) => <WebsiteStackScreen {...props} authHook={authHook} websiteAnalysis={websiteAnalysis} />}
       </Tab.Screen>
       <Tab.Screen name="Social">
-        {(props) => (
-          <SocialScreen
-            {...props}
-            authHook={authHook}
-            analysisHook={analysisHook}
-          />
-        )}
+        {(props) => <SocialStackScreen {...props} authHook={authHook} socialAnalysis={socialAnalysis} />}
       </Tab.Screen>
       <Tab.Screen name="Settings">
         {(props) => <SettingsScreen {...props} authHook={authHook} />}
@@ -133,7 +148,7 @@ function MainTabs({ authHook, analysisHook }) {
   );
 }
 
-export default function Navigation({ authHook, analysisHook }) {
+export default function Navigation({ authHook, hybridAnalysis, websiteAnalysis, socialAnalysis }) {
   const { user, loading } = authHook;
   if (loading === true) return null;
 
@@ -145,36 +160,17 @@ export default function Navigation({ authHook, analysisHook }) {
             {(props) => <AuthScreen {...props} authHook={authHook} />}
           </Stack.Screen>
         ) : (
-          <>
-            <Stack.Screen name="Main">
-              {(props) => (
-                <MainTabs
-                  {...props}
-                  authHook={authHook}
-                  analysisHook={analysisHook}
-                />
-              )}
-            </Stack.Screen>
-            <Stack.Screen name="Results">
-              {(props) => (
-                <ResultsScreen {...props} analysisHook={analysisHook} />
-              )}
-            </Stack.Screen>
-            <Stack.Screen name="AIAdvisor">
-              {(props) => (
-                <AIAdvisorScreen {...props} analysisHook={analysisHook} />
-              )}
-            </Stack.Screen>
-            <Stack.Screen name="Social">
-              {(props) => (
-                <SocialScreen
-                  {...props}
-                  authHook={authHook}
-                  analysisHook={analysisHook}
-                />
-              )}
-            </Stack.Screen>
-          </>
+          <Stack.Screen name="Main">
+            {(props) => (
+              <MainTabs
+                {...props}
+                authHook={authHook}
+                hybridAnalysis={hybridAnalysis}
+                websiteAnalysis={websiteAnalysis}
+                socialAnalysis={socialAnalysis}
+              />
+            )}
+          </Stack.Screen>
         )}
       </Stack.Navigator>
     </NavigationContainer>
