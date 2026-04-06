@@ -9,6 +9,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants";
 import { globalStyles } from "../styles";
+import SkeletonCard from "../components/SkeletonCard";
 
 function ScoreRing({ score }) {
   const color =
@@ -56,12 +57,41 @@ export default function ResultsScreen({ navigation, analysisHook }) {
 
   if (loading) {
     return (
-      <View style={globalStyles.empty}>
-        <ActivityIndicator color={COLORS.primary} size="large" />
-        <Text style={[globalStyles.emptyText, { marginTop: 16 }]}>
-          Analyzing...
-        </Text>
-      </View>
+      <ScrollView
+        style={globalStyles.container}
+        contentContainerStyle={globalStyles.inner}
+      >
+        {/* Step message */}
+        <View style={{ marginBottom: 28 }}>
+          <SkeletonCard height={30} style={{ width: "60%", marginBottom: 8 }} />
+        </View>
+
+        {/* Score ring skeleton */}
+        <View style={{ alignItems: "center", marginBottom: 32 }}>
+          <SkeletonCard height={140} style={{ width: 140, borderRadius: 70 }} />
+        </View>
+
+        {/* Score cards skeleton */}
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 12,
+            marginBottom: 32,
+          }}
+        >
+          <SkeletonCard height={110} style={{ width: "47%" }} />
+          <SkeletonCard height={110} style={{ width: "47%" }} />
+          <SkeletonCard height={110} style={{ width: "47%" }} />
+          <SkeletonCard height={110} style={{ width: "47%" }} />
+        </View>
+
+        {/* Vitals skeleton */}
+        <SkeletonCard height={180} />
+
+        {/* Button skeleton */}
+        <SkeletonCard height={58} style={{ marginTop: 8 }} />
+      </ScrollView>
     );
   }
 

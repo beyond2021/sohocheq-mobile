@@ -24,6 +24,8 @@ export function useAnalysis() {
   };
 
   const analyze = async ({ url, twitter, instagram, tiktok, youtube }) => {
+    console.log("🤣 Hybrid is analyzing");
+
     setLoading(true);
     setReady(false);
     setError(null);
@@ -43,7 +45,7 @@ export function useAnalysis() {
         "Content-Type": "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),
       };
-
+      /************************************SEO CALL********************************** */
       const seoRes = await fetch(`${API_BASE}/analyze-seo`, {
         method: "POST",
         headers: authHeaders,
@@ -62,6 +64,7 @@ export function useAnalysis() {
       );
 
       if (hasHandles) {
+        console.log("🇯🇲 handles Recognized");
         setStep("Calculating social reach...");
         socialData = {};
         const requests = [];

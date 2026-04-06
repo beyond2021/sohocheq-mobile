@@ -13,8 +13,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants";
 import { globalStyles } from "../styles";
 import AnimatedInput from "../components/AnimatedInput";
+import SkeletonCard from "../components/SkeletonCard";
 
-export default function HybridScreen({ navigation, analysisHook, authHook }) {
+export default function HybridScreen({
+  navigation,
+  analysisHook,
+  authHook,
+  step,
+}) {
   const [url, setUrl] = useState("");
   const [twitter, setTwitter] = useState("");
   const [instagram, setInstagram] = useState("");
@@ -32,6 +38,7 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
     const trimmedUrl = url.trim();
     if (!trimmedUrl) return;
     analyze({ url: trimmedUrl, twitter, instagram, tiktok, youtube });
+   
   };
 
   return (
@@ -131,13 +138,23 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
             style={[globalStyles.btn, loading && globalStyles.btnDisabled]}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <View style={{ alignItems: "center" }}>
+                <ActivityIndicator color="#fff" size="small" />
+                <Text
+                  style={{
+                    color: "rgba(255,255,255,0.8)",
+                    fontSize: 12,
+                    marginTop: 6,
+                  }}
+                >
+                  {step || "Analyzing..."}
+                </Text>
+              </View>
             ) : (
               <Text style={globalStyles.btnText}>Analyze →</Text>
             )}
           </LinearGradient>
         </TouchableOpacity>
-
         <Text style={globalStyles.ticker}>
           Social media earnings calculator · Influencer earnings per post
         </Text>
