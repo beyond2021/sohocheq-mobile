@@ -16,7 +16,6 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants";
-import { globalStyles } from "../styles";
 
 export default function AuthScreen({ navigation, route, authHook }) {
   const [mode, setMode] = useState(route?.params?.mode || "signin");
