@@ -1,88 +1,167 @@
 import { useState } from "react";
 import { API_BASE } from "../constants";
+import { supabase } from "../lib/supabase";
 
 export function useAnalysis() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState(0);
+  const [ready, setReady] = useState(false);
+
+  const getToken = async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      console.log("🔑 Token:", session?.access_token ? "EXISTS" : "MISSING");
+      return session?.access_token || null;
+    } catch (e) {
+      console.error("❌ Token error:", e);
+      return null;
+    }
+  };
 
   const analyze = async ({ url, twitter, instagram, tiktok, youtube }) => {
-    console.log("🔍 Starting analysis for:", url);
     setLoading(true);
+    setReady(false);
     setError(null);
     setResult(null);
     setProgress(10);
 
     try {
-      // Normalize URL
       let cleanUrl = url.trim();
       if (!cleanUrl.startsWith("http")) cleanUrl = "https://" + cleanUrl;
 
       setProgress(30);
 
-      // Call existing Netlify SEO function
+      const token = await getToken();
+      const authHeaders = {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      };
+
       const seoRes = await fetch(`${API_BASE}/analyze-seo`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders,
         body: JSON.stringify({ url: cleanUrl }),
       });
 
-      console.log("📊 SEO response status:", seoRes.status);
-      const seoData = await seoRes.json();
-      console.log("SEO DATA:", JSON.stringify(seoData));
-      console.log("📊 SEO data:", JSON.stringify(seoData));
-
       setProgress(60);
-
       if (!seoRes.ok) throw new Error("SEO analysis failed");
-      // const seoData = await seoRes.json();
+      const seoData = await seoRes.json();
 
       setProgress(80);
 
-      // Call social if handles provided
       let socialData = null;
-      const handles = { twitter, instagram, tiktok, youtube };
-      const hasHandles = Object.values(handles).some((h) => h?.trim());
+      const hasHandles = [twitter, instagram, tiktok, youtube].some((h) =>
+        h?.trim(),
+      );
 
       if (hasHandles) {
-        try {
-          const requests = [];
-          if (instagram)
-            requests.push(
-              fetch(
-                `${API_BASE}/instagram-data?username=${instagram.replace("@", "")}`,
-              ).then((r) => (r.ok ? r.json() : null)),
-            );
-          if (twitter)
-            requests.push(
-              fetch(
-                `${API_BASE}/twitter-data?username=${twitter.replace("@", "")}`,
-              ).then((r) => (r.ok ? r.json() : null)),
-            );
-          if (tiktok)
-            requests.push(
-              fetch(
-                `${API_BASE}/tiktok-data?username=${tiktok.replace("@", "")}`,
-              ).then((r) => (r.ok ? r.json() : null)),
-            );
-          if (youtube)
-            requests.push(
-              fetch(
-                `${API_BASE}/youtube-data?username=${youtube.replace("@", "")}`,
-              ).then((r) => (r.ok ? r.json() : null)),
-            );
-          const results = await Promise.allSettled(requests);
-          socialData = results
-            .map((r) => (r.status === "fulfilled" ? r.value : null))
-            .filter(Boolean);
-        } catch (e) {
-          console.warn("Social analysis failed:", e);
+        socialData = {};
+        const requests = [];
+
+        if (instagram?.trim()) {
+          requests.push(
+            fetch(
+              `${API_BASE}/instagram-data?username=${instagram.replace("@", "")}`,
+              { headers: authHeaders },
+            )
+              .then((r) => {
+                console.log("📸 Instagram status:", r.status);
+                return r.ok ? r.json() : null;
+              })
+              .then((data) => {
+                console.log("📸 Instagram data:", JSON.stringify(data));
+                if (data)
+                  socialData.instagram = {
+                    ...data,
+                    platform: "instagram",
+                    handle: instagram.replace("@", ""),
+                  };
+              })
+              .catch((e) => console.error("❌ Instagram error:", e)),
+          );
         }
+
+        if (twitter?.trim()) {
+          requests.push(
+            fetch(
+              `${API_BASE}/twitter-data?username=${twitter.replace("@", "")}`,
+              { headers: authHeaders },
+            )
+              .then((r) => {
+                console.log("𝕏 Twitter status:", r.status);
+                return r.ok ? r.json() : null;
+              })
+              .then((data) => {
+                console.log("𝕏 Twitter data:", JSON.stringify(data));
+                if (data)
+                  socialData.twitter = {
+                    ...data,
+                    platform: "twitter",
+                    handle: twitter.replace("@", ""),
+                  };
+              })
+              .catch((e) => console.error("❌ Twitter error:", e)),
+          );
+        }
+
+        if (tiktok?.trim()) {
+          requests.push(
+            fetch(
+              `${API_BASE}/tiktok-data?username=${tiktok.replace("@", "")}`,
+              { headers: authHeaders },
+            )
+              .then((r) => {
+                console.log("🎵 TikTok status:", r.status);
+                return r.ok ? (r.ok ? r.json() : null) : null;
+              })
+              .then((data) => {
+                console.log("🎵 TikTok data:", JSON.stringify(data));
+                if (data)
+                  socialData.tiktok = {
+                    ...data,
+                    platform: "tiktok",
+                    handle: tiktok.replace("@", ""),
+                  };
+              })
+              .catch((e) => console.error("❌ TikTok error:", e)),
+          );
+        }
+
+        if (youtube?.trim()) {
+          requests.push(
+            fetch(
+              `${API_BASE}/youtube-data?username=${youtube.replace("@", "")}`,
+              { headers: authHeaders },
+            )
+              .then((r) => {
+                console.log("▶️ YouTube status:", r.status);
+                return r.ok ? r.json() : null;
+              })
+              .then((data) => {
+                console.log("▶️ YouTube data:", JSON.stringify(data));
+                if (data)
+                  socialData.youtube = {
+                    ...data,
+                    platform: "youtube",
+                    handle: youtube.replace("@", ""),
+                  };
+              })
+              .catch((e) => console.error("❌ YouTube error:", e)),
+          );
+        }
+
+        await Promise.allSettled(requests);
+        console.log("📱 Social data:", JSON.stringify(socialData));
+        if (Object.keys(socialData).length === 0) socialData = null;
       }
 
       setProgress(100);
       setResult({ seo: seoData, social: socialData, url: cleanUrl });
+      setReady(true);
     } catch (e) {
       setError(e.message || "Analysis failed. Please try again.");
     } finally {
@@ -94,7 +173,8 @@ export function useAnalysis() {
     setResult(null);
     setError(null);
     setProgress(0);
+    setReady(false);
   };
 
-  return { analyze, loading, result, error, progress, reset };
+  return { analyze, loading, result, error, progress, reset, ready };
 }

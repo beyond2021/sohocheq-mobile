@@ -1,14 +1,18 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants";
 import { globalStyles } from "../styles";
+import AnimatedInput from "../components/AnimatedInput";
 
 const { width } = Dimensions.get("window");
 
@@ -36,15 +40,13 @@ function PlatformCard({
   platform,
   icon,
   color,
-  data,
+  handle,
   followers,
   posts,
-  extra,
+  postsLabel,
+  verified,
 }) {
-  if (!data?.exists) return null;
-
   const worth = estimateWorthPerPost(followers, platform);
-
   return (
     <View style={{ marginBottom: 16 }}>
       <LinearGradient
@@ -56,7 +58,6 @@ function PlatformCard({
           borderColor: color + "44",
         }}
       >
-        {/* Platform Header */}
         <View
           style={{
             flexDirection: "row",
@@ -81,7 +82,7 @@ function PlatformCard({
             <Text
               style={{ fontSize: 16, fontWeight: "800", color: COLORS.text }}
             >
-              @{data.username}
+              @{handle}
             </Text>
             <Text
               style={{
@@ -95,7 +96,7 @@ function PlatformCard({
               {platform}
             </Text>
           </View>
-          {data.verified && (
+          {verified && (
             <View
               style={{
                 backgroundColor: color + "33",
@@ -110,8 +111,6 @@ function PlatformCard({
             </View>
           )}
         </View>
-
-        {/* Stats Row */}
         <View
           style={{
             flexDirection: "row",
@@ -151,7 +150,7 @@ function PlatformCard({
                 marginTop: 2,
               }}
             >
-              {extra?.label || "Posts"}
+              {postsLabel}
             </Text>
           </View>
           <View style={{ width: 1, backgroundColor: COLORS.border }} />
@@ -171,8 +170,6 @@ function PlatformCard({
             </Text>
           </View>
         </View>
-
-        {/* Worth Bar */}
         <View
           style={{
             backgroundColor: COLORS.surface,
@@ -193,7 +190,7 @@ function PlatformCard({
             }}
           >
             Estimated <Text style={{ color, fontWeight: "800" }}>{worth}</Text>{" "}
-            per sponsored post based on {formatNumber(followers)} followers
+            per sponsored post
           </Text>
         </View>
       </LinearGradient>
@@ -201,181 +198,292 @@ function PlatformCard({
   );
 }
 
-export default function SocialScreen({ navigation, analysisHook }) {
-  const { result } = analysisHook;
+export default function SocialScreen({ navigation, analysisHook, authHook }) {
+  const [twitter, setTwitter] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [tiktok, setTiktok] = useState("");
+  const [youtube, setYoutube] = useState("");
+
+  const { analyze, loading, result, error, ready, reset } = analysisHook;
+  const { user } = authHook;
   const social = result?.social;
 
-  if (!social || social.length === 0) {
+  useEffect(() => {
+    if (ready && result?.social) {
+      // Stay on this screen and show results
+    }
+  }, [ready]);
+
+  const handleAnalyze = () => {
+    const hasHandles = [twitter, instagram, tiktok, youtube].some((h) =>
+      h?.trim(),
+    );
+    if (!hasHandles) return;
+    analyze({
+      url: "https://sohocheq.com",
+      twitter,
+      instagram,
+      tiktok,
+      youtube,
+    });
+  };
+
+  const handleReset = () => {
+    reset();
+    setTwitter("");
+    setInstagram("");
+    setTiktok("");
+    setYoutube("");
+  };
+
+  // Show results if we have social data
+  if (social && Object.keys(social).length > 0) {
+    const { instagram: ig, twitter: tw, tiktok: tt, youtube: yt } = social;
+
+    const platforms = [
+      ig && {
+        key: "instagram",
+        icon: "📸",
+        color: "#e1306c",
+        handle: ig.handle,
+        followers: ig.followers || 0,
+        posts: ig.posts || 0,
+        postsLabel: "Posts",
+        verified: ig.verified || false,
+      },
+      tw && {
+        key: "twitter",
+        icon: "𝕏",
+        color: "#1da1f2",
+        handle: tw.handle,
+        followers: tw.followers || 0,
+        posts: tw.tweets || 0,
+        postsLabel: "Tweets",
+        verified: tw.verified || false,
+      },
+      tt && {
+        key: "tiktok",
+        icon: "🎵",
+        color: "#ff0050",
+        handle: tt.handle,
+        followers: tt.followers || 0,
+        posts: tt.videos || 0,
+        postsLabel: "Videos",
+        verified: false,
+      },
+      yt && {
+        key: "youtube",
+        icon: "▶️",
+        color: "#ff0000",
+        handle: yt.handle,
+        followers: yt.subscribers || 0,
+        posts: yt.videoCount || 0,
+        postsLabel: "Videos",
+        verified: false,
+      },
+    ].filter(Boolean);
+
+    const totalFollowers = platforms.reduce((acc, p) => acc + p.followers, 0);
+
     return (
-      <View style={globalStyles.empty}>
-        <Text style={{ fontSize: 40, marginBottom: 16 }}>📱</Text>
-        <Text style={globalStyles.emptyText}>No social data yet</Text>
-        <Text
+      <ScrollView
+        style={globalStyles.container}
+        contentContainerStyle={globalStyles.inner}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={globalStyles.header}>
+          <View>
+            <Text style={globalStyles.logoSub}>SOH·O</Text>
+            <Text style={globalStyles.logo}>CHEQ</Text>
+          </View>
+          <TouchableOpacity
+            onPress={handleReset}
+            style={{
+              backgroundColor: COLORS.surface,
+              paddingHorizontal: 14,
+              paddingVertical: 8,
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: COLORS.border,
+            }}
+          >
+            <Text
+              style={{
+                color: COLORS.textMuted,
+                fontSize: 13,
+                fontWeight: "600",
+              }}
+            >
+              ← New
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <LinearGradient
+          colors={["#7c3aed22", "#db277722"]}
           style={{
-            color: COLORS.textFaint,
-            fontSize: 13,
-            textAlign: "center",
-            marginBottom: 24,
-            paddingHorizontal: 40,
+            borderRadius: 24,
+            padding: 24,
+            marginBottom: 28,
+            borderWidth: 1,
+            borderColor: "#7c3aed44",
           }}
         >
-          Add your social handles and run an analysis
-        </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-          <Text style={globalStyles.backLink}>← Go to Home</Text>
+          <Text
+            style={{
+              fontSize: 13,
+              fontWeight: "700",
+              color: "#a78bfa",
+              textTransform: "uppercase",
+              letterSpacing: 1.5,
+              marginBottom: 8,
+            }}
+          >
+            Social Health Report
+          </Text>
+          <Text
+            style={{
+              fontSize: 36,
+              fontWeight: "900",
+              color: COLORS.text,
+              marginBottom: 4,
+            }}
+          >
+            {formatNumber(totalFollowers)}
+          </Text>
+          <Text style={{ fontSize: 14, color: COLORS.textMuted }}>
+            Total followers across all platforms
+          </Text>
+        </LinearGradient>
+
+        <Text style={globalStyles.sectionTitle}>Platform Breakdown</Text>
+
+        {platforms.map((p) => (
+          <PlatformCard
+            key={p.key}
+            platform={p.key}
+            icon={p.icon}
+            color={p.color}
+            handle={p.handle}
+            followers={p.followers}
+            posts={p.posts}
+            postsLabel={p.postsLabel}
+            verified={p.verified}
+          />
+        ))}
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate("AIAdvisor")}
+          style={globalStyles.btnWrap}
+        >
+          <LinearGradient
+            colors={["#7c3aed", "#db2777"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={globalStyles.btn}
+          >
+            <Text style={globalStyles.btnText}>🤖 Get AI Strategy →</Text>
+          </LinearGradient>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     );
   }
 
-  const instagram = social.find((s) => s?.username)?.instagram || social[0];
-  const twitter = social.find((s) => s?.twitter) || social[1];
-  const tiktok = social.find((s) => s?.tiktok) || social[2];
-  const youtube = social.find((s) => s?.youtube) || social[3];
-
-  const totalFollowers = social.reduce((acc, s) => {
-    return acc + (s?.followers || s?.subscribers || 0);
-  }, 0);
-
+  // Input mode
   return (
-    <ScrollView
+    <KeyboardAvoidingView
       style={globalStyles.container}
-      contentContainerStyle={globalStyles.inner}
-      showsVerticalScrollIndicator={false}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={globalStyles.back}
+      <ScrollView
+        contentContainerStyle={globalStyles.inner}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={globalStyles.backText}>← Back</Text>
-      </TouchableOpacity>
+        <View style={globalStyles.header}>
+          <View>
+            <Text style={globalStyles.logoSub}>SOH·O</Text>
+            <Text style={globalStyles.logo}>CHEQ</Text>
+          </View>
+          {user && (
+            <View style={globalStyles.avatar}>
+              <Text style={globalStyles.avatarText}>
+                {user.email?.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
+        </View>
 
-      {/* Hero */}
-      <LinearGradient
-        colors={["#7c3aed22", "#db277722"]}
-        style={{
-          borderRadius: 24,
-          padding: 24,
-          marginBottom: 28,
-          borderWidth: 1,
-          borderColor: "#7c3aed44",
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 13,
-            fontWeight: "700",
-            color: "#a78bfa",
-            textTransform: "uppercase",
-            letterSpacing: 1.5,
-            marginBottom: 8,
-          }}
+        {user && (
+          <Text style={globalStyles.greeting}>
+            Hey {user.email?.split("@")[0]} 👋
+          </Text>
+        )}
+
+        <View style={globalStyles.hero}>
+          <Text style={globalStyles.eyebrow}>Social Analysis</Text>
+          <Text style={globalStyles.heroTitle}>
+            Social media{"\n"}earnings report
+          </Text>
+          <Text style={globalStyles.heroSub}>
+            How much is your social media worth per post?
+          </Text>
+        </View>
+
+        <AnimatedInput
+          label="Twitter / X"
+          value={twitter}
+          onChangeText={setTwitter}
+          placeholder="handle"
+          icon="𝕏"
+        />
+        <AnimatedInput
+          label="Instagram"
+          value={instagram}
+          onChangeText={setInstagram}
+          placeholder="handle"
+          icon="📸"
+        />
+        <AnimatedInput
+          label="TikTok"
+          value={tiktok}
+          onChangeText={setTiktok}
+          placeholder="handle"
+          icon="🎵"
+        />
+        <AnimatedInput
+          label="YouTube"
+          value={youtube}
+          onChangeText={setYoutube}
+          placeholder="handle"
+          icon="▶️"
+        />
+
+        {error && <Text style={globalStyles.error}>{error}</Text>}
+
+        <TouchableOpacity
+          onPress={handleAnalyze}
+          disabled={loading}
+          style={globalStyles.btnWrap}
         >
-          Social Health Report
+          <LinearGradient
+            colors={COLORS.primaryGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={[globalStyles.btn, loading && globalStyles.btnDisabled]}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={globalStyles.btnText}>Check My Worth →</Text>
+            )}
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <Text style={globalStyles.ticker}>
+          How much is my Instagram worth · Influencer earnings per post
         </Text>
-        <Text
-          style={{
-            fontSize: 36,
-            fontWeight: "900",
-            color: COLORS.text,
-            marginBottom: 4,
-          }}
-        >
-          {formatNumber(totalFollowers)}
-        </Text>
-        <Text style={{ fontSize: 14, color: COLORS.textMuted }}>
-          Total followers across all platforms
-        </Text>
-      </LinearGradient>
-
-      {/* Platform Cards */}
-      <Text style={globalStyles.sectionTitle}>Platform Breakdown</Text>
-
-      {social.map((platform, i) => {
-        if (!platform) return null;
-
-        const isInstagram = platform.username && platform.posts !== undefined;
-        const isTwitter = platform.tweets !== undefined;
-        const isTiktok = platform.videos !== undefined;
-        const isYoutube = platform.subscribers !== undefined;
-
-        if (isInstagram)
-          return (
-            <PlatformCard
-              key={i}
-              platform="instagram"
-              icon="📸"
-              color="#e1306c"
-              data={{ exists: true, username: platform.username }}
-              followers={platform.followers || 0}
-              posts={platform.posts || 0}
-              extra={{ label: "Posts" }}
-            />
-          );
-
-        if (isTwitter)
-          return (
-            <PlatformCard
-              key={i}
-              platform="twitter"
-              icon="𝕏"
-              color="#1da1f2"
-              data={{
-                exists: true,
-                username: platform.username,
-                verified: platform.verified,
-              }}
-              followers={platform.followers || 0}
-              posts={platform.tweets || 0}
-              extra={{ label: "Tweets" }}
-            />
-          );
-
-        if (isTiktok)
-          return (
-            <PlatformCard
-              key={i}
-              platform="tiktok"
-              icon="🎵"
-              color="#ff0050"
-              data={{ exists: true, username: platform.username }}
-              followers={platform.followers || 0}
-              posts={platform.videos || 0}
-              extra={{ label: "Videos" }}
-            />
-          );
-
-        if (isYoutube)
-          return (
-            <PlatformCard
-              key={i}
-              platform="youtube"
-              icon="▶️"
-              color="#ff0000"
-              data={{ exists: true, username: platform.username }}
-              followers={platform.subscribers || 0}
-              posts={platform.videoCount || 0}
-              extra={{ label: "Videos" }}
-            />
-          );
-
-        return null;
-      })}
-
-      {/* AI Advisor CTA */}
-      <TouchableOpacity
-        onPress={() => navigation.navigate("AIAdvisor")}
-        style={globalStyles.btnWrap}
-      >
-        <LinearGradient
-          colors={["#7c3aed", "#db2777"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={globalStyles.btn}
-        >
-          <Text style={globalStyles.btnText}>🤖 Get AI Strategy →</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
