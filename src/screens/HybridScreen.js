@@ -53,23 +53,40 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
           />
         </View>
 
-        <Text style={{
-          color: COLORS.primary,
-          fontSize: 13,
-          fontWeight: "700",
-          textTransform: "uppercase",
-          letterSpacing: 1.5,
-          marginBottom: 24,
-          textAlign: "center",
-        }}>
+        <Text
+          style={{
+            color: COLORS.primary,
+            fontSize: 13,
+            fontWeight: "700",
+            textTransform: "uppercase",
+            letterSpacing: 1.5,
+            marginBottom: 24,
+            textAlign: "center",
+          }}
+        >
           {step || "Analyzing..."}
         </Text>
 
         <View style={{ alignItems: "center", marginBottom: 32 }}>
-          <SkeletonCard height={140} style={{ width: 140, borderRadius: 70 }} />
+          <SkeletonCard
+            height={140}
+            style={{
+              width: 140,
+              borderRadius: 70,
+              backgroundColor: "rgba(253,54,110,0.15)",
+              borderColor: "rgba(253,54,110,0.3)",
+            }}
+            showMorph
+          />
         </View>
-
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12, marginBottom: 32 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 12,
+            marginBottom: 32,
+          }}
+        >
           <SkeletonCard height={110} style={{ width: "47%" }} />
           <SkeletonCard height={110} style={{ width: "47%" }} />
           <SkeletonCard height={110} style={{ width: "47%" }} />
@@ -133,11 +150,42 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
           </Text>
         </View>
 
-        <AnimatedInput label="Website URL" value={url} onChangeText={setUrl} placeholder="yourdomain.com" keyboardType="url" icon="🌐" />
-        <AnimatedInput label="Twitter / X" value={twitter} onChangeText={setTwitter} placeholder="handle" icon="𝕏" />
-        <AnimatedInput label="Instagram" value={instagram} onChangeText={setInstagram} placeholder="handle" icon="📸" />
-        <AnimatedInput label="TikTok" value={tiktok} onChangeText={setTiktok} placeholder="handle" icon="🎵" />
-        <AnimatedInput label="YouTube" value={youtube} onChangeText={setYoutube} placeholder="handle" icon="▶️" />
+        <AnimatedInput
+          label="Website URL"
+          value={url}
+          onChangeText={setUrl}
+          placeholder="yourdomain.com"
+          keyboardType="url"
+          icon="🌐"
+        />
+        <AnimatedInput
+          label="Twitter / X"
+          value={twitter}
+          onChangeText={setTwitter}
+          placeholder="handle"
+          icon="𝕏"
+        />
+        <AnimatedInput
+          label="Instagram"
+          value={instagram}
+          onChangeText={setInstagram}
+          placeholder="handle"
+          icon="📸"
+        />
+        <AnimatedInput
+          label="TikTok"
+          value={tiktok}
+          onChangeText={setTiktok}
+          placeholder="handle"
+          icon="🎵"
+        />
+        <AnimatedInput
+          label="YouTube"
+          value={youtube}
+          onChangeText={setYoutube}
+          placeholder="handle"
+          icon="▶️"
+        />
 
         {error && <Text style={globalStyles.error}>{error}</Text>}
 

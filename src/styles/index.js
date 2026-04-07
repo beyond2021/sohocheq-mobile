@@ -391,4 +391,12 @@ export const globalStyles = StyleSheet.create({
     alignItems: "center",
   },
   signOutText: { color: COLORS.red, fontSize: 15, fontWeight: "700" },
+
+  skeletonCard: {
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+    borderRadius: 16,
+    marginBottom: 12,
+  },
 });
