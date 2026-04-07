@@ -13,6 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants";
 import { globalStyles } from "../styles";
 import AnimatedInput from "../components/AnimatedInput";
+import SkeletonCard from "../components/SkeletonCard";
 
 const { width } = Dimensions.get("window");
 
@@ -204,7 +205,7 @@ export default function SocialScreen({ navigation, analysisHook, authHook }) {
   const [tiktok, setTiktok] = useState("");
   const [youtube, setYoutube] = useState("");
 
-  const { analyze, loading, result, error, ready, reset } = analysisHook;
+  const { analyze, loading, result, error, ready, reset, step } = analysisHook;
   const { user } = authHook;
   const social = result?.social;
 
@@ -236,6 +237,70 @@ export default function SocialScreen({ navigation, analysisHook, authHook }) {
     setYoutube("");
   };
 
+  if (loading) {
+    return (
+      <ScrollView
+        style={globalStyles.container}
+        contentContainerStyle={globalStyles.inner}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={globalStyles.header}>
+          <View>
+            <Text style={globalStyles.logoSub}>SOH·O</Text>
+            <Text style={globalStyles.logo}>CHEQ</Text>
+          </View>
+        </View>
+        <Text
+          style={{
+            color: COLORS.primary,
+            fontSize: 13,
+            fontWeight: "700",
+            textTransform: "uppercase",
+            letterSpacing: 1.5,
+            marginBottom: 24,
+            textAlign: "center",
+          }}
+        >
+          {step || "Calculating social reach..."}
+        </Text>
+        <View style={{ alignItems: "center", marginBottom: 32 }}>
+          <SkeletonCard
+            height={140}
+            style={{
+              width: 140,
+              borderRadius: 70,
+              backgroundColor: "rgba(253,54,110,0.15)",
+              borderColor: "rgba(253,54,110,0.3)",
+            }}
+            showMorph
+          />
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 12,
+            marginBottom: 32,
+          }}
+        >
+          <SkeletonCard height={110} style={{ width: "47%" }} />
+          <SkeletonCard height={110} style={{ width: "47%" }} />
+          <SkeletonCard height={110} style={{ width: "47%" }} />
+          <SkeletonCard height={110} style={{ width: "47%" }} />
+        </View>
+        <SkeletonCard height={180} />
+        <TouchableOpacity
+          onPress={reset}
+          style={{ marginTop: 16, alignItems: "center" }}
+        >
+          <Text style={{ color: COLORS.red, fontSize: 14, fontWeight: "700" }}>
+            Cancel
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  }
+
   // Show results if we have social data
   if (social && Object.keys(social).length > 0) {
     const { instagram: ig, twitter: tw, tiktok: tt, youtube: yt } = social;
@@ -246,10 +311,10 @@ export default function SocialScreen({ navigation, analysisHook, authHook }) {
         icon: "📸",
         color: "#e1306c",
         handle: ig.handle,
-        followers: ig.followers || 0,
+        followers: ig.profileData?.followers || ig.followers || 0,
         posts: ig.posts || 0,
         postsLabel: "Posts",
-        verified: ig.verified || false,
+        verified: ig.profileData?.isVerified || ig.verified || false,
       },
       tw && {
         key: "twitter",
@@ -277,9 +342,9 @@ export default function SocialScreen({ navigation, analysisHook, authHook }) {
         color: "#ff0000",
         handle: yt.handle,
         followers: yt.subscribers || 0,
-        posts: yt.videoCount || 0,
+        posts: yt.videos || yt.videoCount || 0,
         postsLabel: "Videos",
-        verified: false,
+        verified: yt.verified || false,
       },
     ].filter(Boolean);
 
