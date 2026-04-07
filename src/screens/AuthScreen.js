@@ -1,13 +1,9 @@
 import React, { useState } from "react";
-import { globalStyles } from "../styles";
-
 import {
   View,
   Text,
   Image,
-  TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
@@ -16,9 +12,13 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants";
+import { globalStyles } from "../styles";
+import AnimatedInput from "../components/AnimatedInput";
+import AnimatedBackground from "../components/AnimatedBackground";
 
 export default function AuthScreen({ navigation, route, authHook }) {
   const [mode, setMode] = useState(route?.params?.mode || "signin");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,12 +28,14 @@ export default function AuthScreen({ navigation, route, authHook }) {
   const handleSubmit = async () => {
     if (!email || !password)
       return Alert.alert("Error", "Please enter email and password.");
+    if (mode === "signup" && !fullName.trim())
+      return Alert.alert("Error", "Please enter your name.");
     setLoading(true);
     try {
       const { error } =
         mode === "signin"
           ? await signIn(email, password)
-          : await signUp(email, password);
+          : await signUp(email, password, fullName.trim());
 
       if (error) Alert.alert("Error", error.message);
       else if (mode === "signup")
@@ -51,15 +53,15 @@ export default function AuthScreen({ navigation, route, authHook }) {
       style={globalStyles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
+      <AnimatedBackground />
       <ScrollView
         contentContainerStyle={globalStyles.authInner}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Logo */}
-        <View style={styles.logoWrap}>
+        <View style={globalStyles.logoWrap}>
           <Image
             source={require("../../assets/logo.png")}
-            style={styles.logoImage}
+            style={globalStyles.logoImage}
             resizeMode="contain"
           />
         </View>
@@ -74,48 +76,48 @@ export default function AuthScreen({ navigation, route, authHook }) {
         </Text>
 
         <View style={globalStyles.form}>
-          <Text style={globalStyles.label}>Email</Text>
-          <TextInput
-            style={globalStyles.input}
-            placeholder="you@example.com"
-            placeholderTextColor={COLORS.textFaint}
+          {mode === "signup" && (
+            <AnimatedInput
+              label="Full Name"
+              value={fullName}
+              onChangeText={setFullName}
+              placeholder="Keevin Mitchell"
+              icon="👤"
+            />
+          )}
+
+          <AnimatedInput
+            label="Email"
             value={email}
             onChangeText={setEmail}
-            autoCapitalize="none"
+            placeholder="you@example.com"
             keyboardType="email-address"
             autoComplete="email"
+            icon="✉️"
           />
 
-          <Text style={globalStyles.label}>Password</Text>
-          <TextInput
-            style={globalStyles.input}
-            placeholder="••••••••"
-            placeholderTextColor={COLORS.textFaint}
+          <AnimatedInput
+            label="Password"
             value={password}
             onChangeText={setPassword}
+            placeholder="••••••••"
             secureTextEntry
             autoComplete="password"
+            icon="🔒"
           />
 
           <TouchableOpacity
             onPress={handleSubmit}
             disabled={loading}
-            style={styles.btnWrap}
+            style={[globalStyles.btn, loading && globalStyles.btnDisabled]}
           >
-            <LinearGradient
-              colors={COLORS.primaryGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.btn}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={globalStyles.btnText}>
-                  {mode === "signin" ? "Sign In" : "Create Account"}
-                </Text>
-              )}
-            </LinearGradient>
+            {loading ? (
+              <ActivityIndicator color="#fd366e" />
+            ) : (
+              <Text style={globalStyles.btnText}>
+                {mode === "signin" ? "Sign In" : "Create Account"}
+              </Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -133,50 +135,3 @@ export default function AuthScreen({ navigation, route, authHook }) {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  inner: { flexGrow: 1, justifyContent: "center", padding: 24 },
-  logoWrap: { alignItems: "center", marginBottom: 40 },
-  logoSub: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    letterSpacing: 4,
-    fontWeight: "600",
-  },
-  logo: {
-    fontSize: 42,
-    fontWeight: "900",
-    color: COLORS.text,
-    letterSpacing: -1,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: COLORS.text,
-    marginBottom: 8,
-  },
-  subtitle: { fontSize: 15, color: COLORS.textMuted, marginBottom: 32 },
-  form: { gap: 12 },
-  label: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: COLORS.textMuted,
-    marginBottom: 4,
-  },
-  input: {
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: COLORS.text,
-    marginBottom: 8,
-  },
-  btnWrap: { marginTop: 8 },
-  btn: { borderRadius: 12, padding: 16, alignItems: "center" },
-  btnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
-  switchBtn: { alignItems: "center", marginTop: 16 },
-  switchText: { color: COLORS.primary, fontSize: 14 },
-});

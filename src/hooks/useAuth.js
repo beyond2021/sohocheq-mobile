@@ -8,6 +8,14 @@ export function useAuth() {
   const [isPremium, setIsPremium] = useState(false);
   const [isProfessional, setIsProfessional] = useState(false);
 
+  const getDisplayName = (u) => {
+    return (
+      u?.user_metadata?.full_name ||
+      u?.email?.split("@")[0].split(".")[0] ||
+      "there"
+    );
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -22,6 +30,7 @@ export function useAuth() {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) loadUserTier(session.user.id);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -49,14 +58,6 @@ export function useAuth() {
     }
   };
 
-  const getDisplayName = (user) => {
-    return (
-      user?.user_metadata?.full_name ||
-      user?.email?.split("@")[0].split(".")[0] ||
-      "there"
-    );
-  };
-
   const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -65,8 +66,14 @@ export function useAuth() {
     return { data, error };
   };
 
-  const signUp = async (email, password) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+  const signUp = async (email, password, fullName) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullName },
+      },
+    });
     return { data, error };
   };
 
@@ -74,6 +81,14 @@ export function useAuth() {
     await supabase.auth.signOut();
     setIsPremium(false);
     setIsProfessional(false);
+  };
+
+  const updateName = async (fullName) => {
+    const { data, error } = await supabase.auth.updateUser({
+      data: { full_name: fullName },
+    });
+    if (!error && data?.user) setUser(data.user);
+    return { error };
   };
 
   return {
@@ -85,6 +100,7 @@ export function useAuth() {
     signIn,
     signUp,
     signOut,
+    updateName,
     displayName: getDisplayName(user),
   };
 }
