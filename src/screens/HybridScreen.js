@@ -24,7 +24,7 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
   const [youtube, setYoutube] = useState("");
 
   const { analyze, loading, result, error, ready, step } = analysisHook;
-  const { user } = authHook;
+  const { user, displayName } = authHook;
 
   useEffect(() => {
     if (ready === true && result !== null) {
@@ -115,7 +115,7 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
       style={globalStyles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-        <AnimatedBackground />
+      <AnimatedBackground />
       <ScrollView
         contentContainerStyle={globalStyles.inner}
         keyboardShouldPersistTaps="handled"
@@ -137,9 +137,7 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
         </View>
 
         {user && (
-          <Text style={globalStyles.greeting}>
-            Hey {user.email?.split("@")[0]} 👋
-          </Text>
+          <Text style={globalStyles.greeting}>Hey {displayName} 👋</Text>
         )}
 
         <View style={globalStyles.hero}>
@@ -196,14 +194,7 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
           disabled={loading}
           style={globalStyles.btnWrap}
         >
-          <LinearGradient
-            colors={COLORS.primaryGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={globalStyles.btn}
-          >
-            <Text style={globalStyles.btnText}>Analyze →</Text>
-          </LinearGradient>
+          <Text style={globalStyles.btnText}>Analyze →</Text>
         </TouchableOpacity>
 
         <Text style={globalStyles.ticker}>

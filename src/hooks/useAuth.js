@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
 
 export function useAuth() {
   const [user, setUser] = useState(null);
@@ -16,7 +16,9 @@ export function useAuth() {
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) loadUserTier(session.user.id);
@@ -28,25 +30,38 @@ export function useAuth() {
   const loadUserTier = async (userId) => {
     try {
       const { data } = await supabase
-        .from('users')
-        .select('*, subscriptions(plan_tier, status)')
-        .eq('id', userId)
+        .from("users")
+        .select("*, subscriptions(plan_tier, status)")
+        .eq("id", userId)
         .single();
 
       if (data?.subscriptions?.length > 0) {
-        const active = data.subscriptions.filter(s => s.status === 'active' || s.status === 'trialing');
-        const hasPro = active.some(s => s.plan_tier === 'professional');
-        const hasPremium = active.some(s => s.plan_tier === 'premium');
+        const active = data.subscriptions.filter(
+          (s) => s.status === "active" || s.status === "trialing",
+        );
+        const hasPro = active.some((s) => s.plan_tier === "professional");
+        const hasPremium = active.some((s) => s.plan_tier === "premium");
         setIsProfessional(hasPro);
         setIsPremium(hasPro || hasPremium);
       }
     } catch (e) {
-      console.error('Error loading tier:', e);
+      console.error("Error loading tier:", e);
     }
   };
 
+  const getDisplayName = (user) => {
+    return (
+      user?.user_metadata?.full_name ||
+      user?.email?.split("@")[0].split(".")[0] ||
+      "there"
+    );
+  };
+
   const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     return { data, error };
   };
 
@@ -61,5 +76,15 @@ export function useAuth() {
     setIsProfessional(false);
   };
 
-  return { user, session, loading, isPremium, isProfessional, signIn, signUp, signOut };
+  return {
+    user,
+    session,
+    loading,
+    isPremium,
+    isProfessional,
+    signIn,
+    signUp,
+    signOut,
+    displayName: getDisplayName(user),
+  };
 }

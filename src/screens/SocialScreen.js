@@ -207,7 +207,7 @@ export default function SocialScreen({ navigation, analysisHook, authHook }) {
   const [youtube, setYoutube] = useState("");
 
   const { analyze, loading, result, error, ready, reset, step } = analysisHook;
-  const { user } = authHook;
+  const { user, displayName } = authHook;
   const social = result?.social;
 
   useEffect(() => {
@@ -482,9 +482,7 @@ export default function SocialScreen({ navigation, analysisHook, authHook }) {
         </View>
 
         {user && (
-          <Text style={globalStyles.greeting}>
-            Hey {user.email?.split("@")[0]} 👋
-          </Text>
+          <Text style={globalStyles.greeting}>Hey {displayName} 👋</Text>
         )}
 
         <View style={globalStyles.hero}>
@@ -533,18 +531,11 @@ export default function SocialScreen({ navigation, analysisHook, authHook }) {
           disabled={loading}
           style={globalStyles.btnWrap}
         >
-          <LinearGradient
-            colors={COLORS.primaryGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={[globalStyles.btn, loading && globalStyles.btnDisabled]}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={globalStyles.btnText}>Check My Worth →</Text>
-            )}
-          </LinearGradient>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={globalStyles.btnText}>Check My Worth →</Text>
+          )}
         </TouchableOpacity>
 
         <Text style={globalStyles.ticker}>

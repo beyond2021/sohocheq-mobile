@@ -19,7 +19,7 @@ import AnimatedBackground from "../components/AnimatedBackground";
 export default function WebsiteScreen({ navigation, analysisHook, authHook }) {
   const [url, setUrl] = useState("");
   const { analyze, loading, result, error, ready, step, reset } = analysisHook;
-  const { user } = authHook;
+  const { user, displayName } = authHook;
 
   useEffect(() => {
     if (ready === true && result !== null) navigation.navigate("Results");
@@ -123,9 +123,7 @@ export default function WebsiteScreen({ navigation, analysisHook, authHook }) {
           )}
         </View>
         {user && (
-          <Text style={globalStyles.greeting}>
-            Hey {user.email?.split("@")[0]} 👋
-          </Text>
+          <Text style={globalStyles.greeting}>Hey {displayName} 👋</Text>
         )}
         <View style={globalStyles.hero}>
           <Text style={globalStyles.eyebrow}>Website Analysis</Text>
@@ -150,14 +148,7 @@ export default function WebsiteScreen({ navigation, analysisHook, authHook }) {
           disabled={loading}
           style={globalStyles.btnWrap}
         >
-          <LinearGradient
-            colors={COLORS.primaryGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={globalStyles.btn}
-          >
-            <Text style={globalStyles.btnText}>Analyze Website →</Text>
-          </LinearGradient>
+          <Text style={globalStyles.btnText}>Analyze Website →</Text>
         </TouchableOpacity>
         <Text style={globalStyles.ticker}>
           Check my website SEO score · Website health check free

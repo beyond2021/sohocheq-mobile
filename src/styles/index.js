@@ -46,14 +46,7 @@ export const globalStyles = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: 12,
   },
-  eyebrow: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: COLORS.primary,
-    letterSpacing: 2,
-    textTransform: "uppercase",
-    marginBottom: 8,
-  },
+
   urlText: { fontSize: 13, color: COLORS.textMuted, marginBottom: 24 },
   ticker: {
     marginTop: 20,
@@ -72,13 +65,28 @@ export const globalStyles = StyleSheet.create({
   greeting: { fontSize: 15, color: COLORS.textMuted, marginBottom: 20 },
   hero: { marginBottom: 28 },
   heroTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "900",
     color: COLORS.text,
-    lineHeight: 38,
+    lineHeight: 34,
     marginBottom: 10,
+    fontFamily: "Syne_800ExtraBold",
   },
-  heroSub: { fontSize: 14, color: COLORS.textMuted, lineHeight: 20 },
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: COLORS.primary,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    marginBottom: 8,
+    fontFamily: "Syne_700Bold",
+  },
+  heroSub: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    lineHeight: 20,
+    fontFamily: "Syne_700Bold",
+  },
 
   // ── Inputs ──
   inputGroup: { marginBottom: 16 },
@@ -114,9 +122,22 @@ export const globalStyles = StyleSheet.create({
 
   // ── Buttons ──
   btnWrap: { marginTop: 8 },
-  btn: { borderRadius: 14, padding: 18, alignItems: "center" },
+  btn: {
+    borderRadius: 14,
+    padding: 18,
+    alignItems: "center",
+    backgroundColor: "transparent",
+    borderWidth: 1.5,
+    borderColor: "#fd366e",
+  },
+  btnText: {
+    color: "#fd366e",
+    fontSize: 17,
+    fontWeight: "800",
+    fontFamily: "Syne_800ExtraBold",
+    letterSpacing: 0.5,
+  },
   btnDisabled: { opacity: 0.5 },
-  btnText: { color: "#fff", fontSize: 17, fontWeight: "800" },
   switchBtn: { alignItems: "center", marginTop: 16 },
   switchText: { color: COLORS.primary, fontSize: 14 },
   socialBtnGrad: { borderRadius: 14, padding: 16, alignItems: "center" },
