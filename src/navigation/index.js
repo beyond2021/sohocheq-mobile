@@ -5,6 +5,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants";
+import {
+  HybridIcon,
+  WebsiteIcon,
+  SocialIcon,
+  SettingsIcon,
+} from "../components/icons/TabIcons";
 
 import AuthScreen from "../screens/AuthScreen";
 import HybridScreen from "../screens/HybridScreen";
@@ -22,57 +28,45 @@ const SocialStack = createNativeStackNavigator();
 
 function TabBar({ state, descriptors, navigation }) {
   const tabs = [
-    { name: "Hybrid", icon: "⚡", label: "Hybrid" },
-    { name: "Website", icon: "🌐", label: "Website" },
-    { name: "Social", icon: "📱", label: "Social" },
-    { name: "Settings", icon: "⚙️", label: "Settings" },
+    { name: "Hybrid", Icon: HybridIcon, label: "Hybrid" },
+    { name: "Website", Icon: WebsiteIcon, label: "Website" },
+    { name: "Social", Icon: SocialIcon, label: "Social" },
+    { name: "Settings", Icon: SettingsIcon, label: "Settings" },
   ];
 
   return (
-    <View style={{
-      flexDirection: "row",
-      backgroundColor: "#0d0d14",
-      borderTopWidth: 1,
-      borderTopColor: "rgba(255,255,255,0.08)",
-      paddingBottom: 24,
-      paddingTop: 10,
-      paddingHorizontal: 12,
-    }}>
+    <View
+      style={{
+        flexDirection: "row",
+        backgroundColor: "#0d0d14",
+        borderTopWidth: 1,
+        borderTopColor: "rgba(255,255,255,0.08)",
+        paddingBottom: 24,
+        paddingTop: 10,
+        paddingHorizontal: 12,
+      }}
+    >
       {tabs.map((tab, index) => {
         const focused = state.index === index;
+        const color = focused ? "#fd366e" : "rgba(255,255,255,0.3)";
         return (
           <TouchableOpacity
             key={tab.name}
             onPress={() => navigation.navigate(tab.name)}
-            style={{ flex: 1, alignItems: "center" }}
+            style={{ flex: 1, alignItems: "center", paddingVertical: 8 }}
             activeOpacity={0.8}
           >
-            {focused ? (
-              <LinearGradient
-                colors={["#fd366e", "#c026d3"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: 16,
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
-                  alignItems: "center",
-                  minWidth: 72,
-                }}
-              >
-                <Text style={{ fontSize: 18 }}>{tab.icon}</Text>
-                <Text style={{ fontSize: 10, fontWeight: "700", color: "#fff", marginTop: 2 }}>
-                  {tab.label}
-                </Text>
-              </LinearGradient>
-            ) : (
-              <View style={{ alignItems: "center", paddingVertical: 8 }}>
-                <Text style={{ fontSize: 18, opacity: 0.35 }}>{tab.icon}</Text>
-                <Text style={{ fontSize: 10, fontWeight: "600", color: "rgba(255,255,255,0.35)", marginTop: 2 }}>
-                  {tab.label}
-                </Text>
-              </View>
-            )}
+            <tab.Icon color={color} size={24} />
+            <Text
+              style={{
+                fontSize: 10,
+                fontWeight: focused ? "700" : "600",
+                color,
+                marginTop: 4,
+              }}
+            >
+              {tab.label}
+            </Text>
           </TouchableOpacity>
         );
       })}
@@ -84,13 +78,21 @@ function HybridStackScreen({ authHook, hybridAnalysis }) {
   return (
     <HybridStack.Navigator screenOptions={{ headerShown: false }}>
       <HybridStack.Screen name="HybridHome">
-        {(props) => <HybridScreen {...props} authHook={authHook} analysisHook={hybridAnalysis} />}
+        {(props) => (
+          <HybridScreen
+            {...props}
+            authHook={authHook}
+            analysisHook={hybridAnalysis}
+          />
+        )}
       </HybridStack.Screen>
       <HybridStack.Screen name="Results">
         {(props) => <ResultsScreen {...props} analysisHook={hybridAnalysis} />}
       </HybridStack.Screen>
       <HybridStack.Screen name="AIAdvisor">
-        {(props) => <AIAdvisorScreen {...props} analysisHook={hybridAnalysis} />}
+        {(props) => (
+          <AIAdvisorScreen {...props} analysisHook={hybridAnalysis} />
+        )}
       </HybridStack.Screen>
     </HybridStack.Navigator>
   );
@@ -100,13 +102,21 @@ function WebsiteStackScreen({ authHook, websiteAnalysis }) {
   return (
     <WebsiteStack.Navigator screenOptions={{ headerShown: false }}>
       <WebsiteStack.Screen name="WebsiteHome">
-        {(props) => <WebsiteScreen {...props} authHook={authHook} analysisHook={websiteAnalysis} />}
+        {(props) => (
+          <WebsiteScreen
+            {...props}
+            authHook={authHook}
+            analysisHook={websiteAnalysis}
+          />
+        )}
       </WebsiteStack.Screen>
       <WebsiteStack.Screen name="Results">
         {(props) => <ResultsScreen {...props} analysisHook={websiteAnalysis} />}
       </WebsiteStack.Screen>
       <WebsiteStack.Screen name="AIAdvisor">
-        {(props) => <AIAdvisorScreen {...props} analysisHook={websiteAnalysis} />}
+        {(props) => (
+          <AIAdvisorScreen {...props} analysisHook={websiteAnalysis} />
+        )}
       </WebsiteStack.Screen>
     </WebsiteStack.Navigator>
   );
@@ -116,16 +126,29 @@ function SocialStackScreen({ authHook, socialAnalysis }) {
   return (
     <SocialStack.Navigator screenOptions={{ headerShown: false }}>
       <SocialStack.Screen name="SocialHome">
-        {(props) => <SocialScreen {...props} authHook={authHook} analysisHook={socialAnalysis} />}
+        {(props) => (
+          <SocialScreen
+            {...props}
+            authHook={authHook}
+            analysisHook={socialAnalysis}
+          />
+        )}
       </SocialStack.Screen>
       <SocialStack.Screen name="AIAdvisor">
-        {(props) => <AIAdvisorScreen {...props} analysisHook={socialAnalysis} />}
+        {(props) => (
+          <AIAdvisorScreen {...props} analysisHook={socialAnalysis} />
+        )}
       </SocialStack.Screen>
     </SocialStack.Navigator>
   );
 }
 
-function MainTabs({ authHook, hybridAnalysis, websiteAnalysis, socialAnalysis }) {
+function MainTabs({
+  authHook,
+  hybridAnalysis,
+  websiteAnalysis,
+  socialAnalysis,
+}) {
   return (
     <Tab.Navigator
       tabBar={(props) => <TabBar {...props} />}
@@ -133,13 +156,31 @@ function MainTabs({ authHook, hybridAnalysis, websiteAnalysis, socialAnalysis })
       backBehavior="history"
     >
       <Tab.Screen name="Hybrid">
-        {(props) => <HybridStackScreen {...props} authHook={authHook} hybridAnalysis={hybridAnalysis} />}
+        {(props) => (
+          <HybridStackScreen
+            {...props}
+            authHook={authHook}
+            hybridAnalysis={hybridAnalysis}
+          />
+        )}
       </Tab.Screen>
       <Tab.Screen name="Website">
-        {(props) => <WebsiteStackScreen {...props} authHook={authHook} websiteAnalysis={websiteAnalysis} />}
+        {(props) => (
+          <WebsiteStackScreen
+            {...props}
+            authHook={authHook}
+            websiteAnalysis={websiteAnalysis}
+          />
+        )}
       </Tab.Screen>
       <Tab.Screen name="Social">
-        {(props) => <SocialStackScreen {...props} authHook={authHook} socialAnalysis={socialAnalysis} />}
+        {(props) => (
+          <SocialStackScreen
+            {...props}
+            authHook={authHook}
+            socialAnalysis={socialAnalysis}
+          />
+        )}
       </Tab.Screen>
       <Tab.Screen name="Settings">
         {(props) => <SettingsScreen {...props} authHook={authHook} />}
@@ -148,7 +189,12 @@ function MainTabs({ authHook, hybridAnalysis, websiteAnalysis, socialAnalysis })
   );
 }
 
-export default function Navigation({ authHook, hybridAnalysis, websiteAnalysis, socialAnalysis }) {
+export default function Navigation({
+  authHook,
+  hybridAnalysis,
+  websiteAnalysis,
+  socialAnalysis,
+}) {
   const { user, loading } = authHook;
   if (loading === true) return null;
 

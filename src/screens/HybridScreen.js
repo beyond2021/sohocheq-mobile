@@ -14,6 +14,7 @@ import { COLORS } from "../constants";
 import { globalStyles } from "../styles";
 import AnimatedInput from "../components/AnimatedInput";
 import SkeletonCard from "../components/SkeletonCard";
+import AnimatedBackground from "../components/AnimatedBackground";
 
 export default function HybridScreen({ navigation, analysisHook, authHook }) {
   const [url, setUrl] = useState("");
@@ -114,6 +115,7 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
       style={globalStyles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
+        <AnimatedBackground />
       <ScrollView
         contentContainerStyle={globalStyles.inner}
         keyboardShouldPersistTaps="handled"
