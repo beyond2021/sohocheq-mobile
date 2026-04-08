@@ -10,6 +10,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants";
 import { globalStyles } from "../styles";
 import SkeletonCard from "../components/SkeletonCard";
+import { useState } from "react";
+import ActionBar from "../components/ActionBar";
+import BottomModal from "../components/BottomModal";
+import AIAdvisorContent from "../components/AIAdvisorContent";
+import SocialContent from "../components/SocialContent";
 
 function ScoreRing({ score }) {
   const color =
@@ -54,6 +59,8 @@ function VitalRow({ label, value, status, color }) {
 
 export default function ResultsScreen({ navigation, analysisHook }) {
   const { result, loading } = analysisHook;
+  const [showAI, setShowAI] = useState(false);
+  const [showSocial, setShowSocial] = useState(false);
 
   if (loading) {
     return (
@@ -123,105 +130,107 @@ export default function ResultsScreen({ navigation, analysisHook }) {
   const getStatus = (s) => (s >= 75 ? "Good" : s >= 50 ? "Fair" : "Poor");
 
   return (
-    <ScrollView
-      style={globalStyles.container}
-      contentContainerStyle={globalStyles.inner}
-    >
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={globalStyles.back}
+    <View style={globalStyles.container}>
+      <ScrollView
+        style={globalStyles.container}
+        contentContainerStyle={globalStyles.inner}
       >
-        <Text style={globalStyles.backText}>← New Analysis</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            analysisHook.reset();
+            navigation.goBack();
+          }}
+          style={globalStyles.back}
+        >
+          <Text style={globalStyles.backText}>← New Analysis</Text>
+        </TouchableOpacity>
 
-      <Text style={globalStyles.urlText}>{result.url}</Text>
+        <Text style={globalStyles.urlText}>{result.url}</Text>
 
-      <View style={globalStyles.ringWrap}>
-        <ScoreRing score={score} />
-      </View>
+        <View style={globalStyles.ringWrap}>
+          <ScoreRing score={score} />
+        </View>
 
-      <View style={globalStyles.cardGrid}>
-        <ScoreCard
-          icon="🚀"
-          label="Performance"
-          value={`${tech.performance || "--"}%`}
-          color={getColor(tech.performance || 0)}
-        />
-        <ScoreCard
-          icon="📱"
-          label="Mobile"
-          value={`${tech.mobile || "--"}%`}
-          color={getColor(tech.mobile || 0)}
-        />
-        <ScoreCard
-          icon="⚡"
-          label="Speed"
-          value={`${tech.speed || "--"}%`}
-          color={getColor(tech.speed || 0)}
-        />
-        <ScoreCard
-          icon="🔒"
-          label="Security"
-          value={`${tech.security || "--"}%`}
-          color={COLORS.purple}
-        />
-      </View>
-
-      <View style={globalStyles.section}>
-        <Text style={globalStyles.sectionTitle}>Core Web Vitals</Text>
-        <View style={globalStyles.vitalsCard}>
-          <VitalRow
-            label="Largest Contentful Paint"
-            value={lcpVal}
-            status={getStatus(lcpScore)}
-            color={getColor(lcpScore)}
+        <View style={globalStyles.cardGrid}>
+          <ScoreCard
+            icon="🚀"
+            label="Performance"
+            value={`${tech.performance || "--"}%`}
+            color={getColor(tech.performance || 0)}
           />
-          <View style={globalStyles.divider} />
-          <VitalRow
-            label="Cumulative Layout Shift"
-            value={clsVal}
-            status={getStatus(clsScore)}
-            color={getColor(clsScore)}
+          <ScoreCard
+            icon="📱"
+            label="Mobile"
+            value={`${tech.mobile || "--"}%`}
+            color={getColor(tech.mobile || 0)}
           />
-          <View style={globalStyles.divider} />
-          <VitalRow
-            label="Interaction to Next Paint"
-            value={inpVal}
-            status="Good"
-            color={COLORS.green}
+          <ScoreCard
+            icon="⚡"
+            label="Speed"
+            value={`${tech.speed || "--"}%`}
+            color={getColor(tech.speed || 0)}
+          />
+          <ScoreCard
+            icon="🔒"
+            label="Security"
+            value={`${tech.security || "--"}%`}
+            color={COLORS.purple}
           />
         </View>
-      </View>
 
-      <TouchableOpacity
-        onPress={() => navigation.navigate("AIAdvisor")}
-        style={globalStyles.btnWrap}
+        <View style={globalStyles.section}>
+          <Text style={globalStyles.sectionTitle}>Core Web Vitals</Text>
+          <View style={globalStyles.vitalsCard}>
+            <VitalRow
+              label="Largest Contentful Paint"
+              value={lcpVal}
+              status={getStatus(lcpScore)}
+              color={getColor(lcpScore)}
+            />
+            <View style={globalStyles.divider} />
+            <VitalRow
+              label="Cumulative Layout Shift"
+              value={clsVal}
+              status={getStatus(clsScore)}
+              color={getColor(clsScore)}
+            />
+            <View style={globalStyles.divider} />
+            <VitalRow
+              label="Interaction to Next Paint"
+              value={inpVal}
+              status="Good"
+              color={COLORS.green}
+            />
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Action Bar */}
+      <ActionBar
+        onResults={() => {}}
+        onAI={() => setShowAI(true)}
+        onSocial={() => setShowSocial(true)}
+        hasResults={!!result?.seo}
+        hasSocial={!!result?.social && Object.keys(result.social).length > 0}
+      />
+
+      {/* AI Modal */}
+      <BottomModal
+        visible={showAI}
+        onClose={() => setShowAI(false)}
+        title="AI Advisor"
       >
-        <LinearGradient
-          colors={["#7c3aed", "#db2777"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={globalStyles.btn}
-        >
-          <Text style={globalStyles.btnText}>🤖 AI Social Advisor →</Text>
-        </LinearGradient>
-      </TouchableOpacity>
+        <AIAdvisorContent analysisHook={analysisHook} />
+      </BottomModal>
 
-      {result.social && (
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Social")}
-          style={[globalStyles.btnWrap, { marginTop: 12 }]}
-        >
-          <LinearGradient
-            colors={["#7c3aed", "#db2777"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={globalStyles.btn}
-          >
-            <Text style={globalStyles.btnText}>View Social Report →</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      )}
-    </ScrollView>
+      {/* Social Modal */}
+      <BottomModal
+        visible={showSocial}
+        onClose={() => setShowSocial(false)}
+        title="Social Report"
+      >
+        <SocialContent analysisHook={analysisHook} />
+      </BottomModal>
+    </View>
   );
 }
