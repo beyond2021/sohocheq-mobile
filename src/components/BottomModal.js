@@ -14,7 +14,13 @@ import { COLORS } from "../constants";
 
 const { height: H } = Dimensions.get("window");
 
-export default function BottomModal({ visible, onClose, title, children }) {
+export default function BottomModal({
+  visible,
+  onClose,
+  title,
+  children,
+  fullScreen,
+}) {
   const translateY = useRef(new Animated.Value(H)).current;
 
   useEffect(() => {
@@ -41,15 +47,13 @@ export default function BottomModal({ visible, onClose, title, children }) {
         if (dy > 0) translateY.setValue(dy);
       },
       onPanResponderRelease: (_, { dy }) => {
-        if (dy > 100) {
-          onClose();
-        } else {
+        if (dy > 100) onClose();
+        else
           Animated.spring(translateY, {
             toValue: 0,
             damping: 20,
             useNativeDriver: true,
           }).start();
-        }
       },
     }),
   ).current;
@@ -67,20 +71,22 @@ export default function BottomModal({ visible, onClose, title, children }) {
           onPress={onClose}
           activeOpacity={1}
         />
-        <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
-          {/* Drag handle */}
+        <Animated.View
+          style={[
+            styles.sheet,
+            fullScreen && { maxHeight: "95%" },
+            { transform: [{ translateY }] },
+          ]}
+        >
           <View {...panResponder.panHandlers} style={styles.handleWrap}>
             <View style={styles.handle} />
           </View>
-
-          {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>{title}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
           </View>
-
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.content}

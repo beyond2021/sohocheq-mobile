@@ -228,6 +228,7 @@ export default function ResultsScreen({ navigation, analysisHook }) {
         visible={showSocial}
         onClose={() => setShowSocial(false)}
         title="Social Report"
+        fullScreen
       >
         <SocialContent analysisHook={analysisHook} />
       </BottomModal>
