@@ -157,26 +157,43 @@ export default function ResultsScreen({ navigation, analysisHook }) {
           <ScoreCard
             icon="🚀"
             label="Performance"
-            value={`${tech.performance || "--"}%`}
-            color={getColor(tech.performance || 0)}
+            value={tech.performance ? `${tech.performance}%` : "N/A"}
+            color={
+              tech.performance >= 75
+                ? COLORS.green
+                : tech.performance >= 50
+                  ? COLORS.yellow
+                  : COLORS.red
+            }
           />
           <ScoreCard
             icon="📱"
             label="Mobile"
-            value={`${tech.mobile || "--"}%`}
-            color={getColor(tech.mobile || 0)}
+            value={tech.mobile ? `${tech.mobile}%` : "N/A"}
+            color={
+              tech.mobile >= 75
+                ? COLORS.green
+                : tech.mobile >= 50
+                  ? COLORS.yellow
+                  : COLORS.red
+            }
           />
-          // Replace tech.speed with tech.desktop:
           <ScoreCard
             icon="⚡"
             label="Desktop"
-            value={`${tech.desktop || "--"}%`}
-            color={getColor(tech.desktop || 0)}
+            value={tech.desktop ? `${tech.desktop}%` : "N/A"}
+            color={
+              tech.desktop >= 75
+                ? COLORS.green
+                : tech.desktop >= 50
+                  ? COLORS.yellow
+                  : COLORS.red
+            }
           />
           <ScoreCard
             icon="🔒"
             label="Security"
-            value={`${tech.security || "--"}%`}
+            value={tech.security ? `${tech.security}%` : "N/A"}
             color={COLORS.purple}
           />
         </View>
@@ -240,9 +257,7 @@ export default function ResultsScreen({ navigation, analysisHook }) {
         onPress={() => navigation.navigate("GrowthPlan")}
         style={[globalStyles.btnWrap, { margin: 16 }]}
       >
-      
-          <Text style={globalStyles.btnText}>🌱 View Your Growth Plan →</Text>
-       
+        <Text style={globalStyles.btnText}>🌱 View Your Growth Plan →</Text>
       </TouchableOpacity>
     </View>
   );
