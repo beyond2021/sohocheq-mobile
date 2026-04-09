@@ -1,16 +1,30 @@
 import { createClient } from "@supabase/supabase-js";
-import * as SecureStore from "expo-secure-store";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../constants";
-
-const ExpoSecureStoreAdapter = {
-  getItem: (key) => SecureStore.getItemAsync(key),
-  setItem: (key, value) => SecureStore.setItemAsync(key, value),
-  removeItem: (key) => SecureStore.deleteItemAsync(key),
-};
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: ExpoSecureStoreAdapter,
+    storage: {
+      getItem: async (key) => {
+        try {
+          const { default: SecureStore } = await import("expo-secure-store");
+          return await SecureStore.getItemAsync(key);
+        } catch {
+          return null;
+        }
+      },
+      setItem: async (key, value) => {
+        try {
+          const { default: SecureStore } = await import("expo-secure-store");
+          await SecureStore.setItemAsync(key, value);
+        } catch {}
+      },
+      removeItem: async (key) => {
+        try {
+          const { default: SecureStore } = await import("expo-secure-store");
+          await SecureStore.deleteItemAsync(key);
+        } catch {}
+      },
+    },
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,

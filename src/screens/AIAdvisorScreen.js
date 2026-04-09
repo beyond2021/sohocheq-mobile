@@ -1,25 +1,26 @@
-// src/screens/AIAdvisorScreen.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { COLORS } from "../constants";
+import { COLORS, API_BASE } from "../constants";
 import { globalStyles } from "../styles";
-import { API_BASE } from "../constants";
 
-export default function AIAdvisorScreen({ navigation, analysisHook }) {
+export default function AIAdvisorContent({ analysisHook }) {
   const { result } = analysisHook;
   const [loading, setLoading] = useState(false);
   const [advice, setAdvice] = useState(null);
   const [error, setError] = useState(null);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    if (result?.seo) fetchAdvice();
+    if (result?.seo && !hasFetched.current) {
+      hasFetched.current = true;
+      fetchAdvice();
+    }
   }, []);
 
   const fetchAdvice = async () => {
@@ -28,128 +29,84 @@ export default function AIAdvisorScreen({ navigation, analysisHook }) {
     try {
       const seo = result.seo;
       const issues = seo.issues?.slice(0, 2).join(", ") || "No issues";
-      const url = result.url;
-      const score = seo.score || 0;
-      const performance = seo.technical?.performance || 0;
-      const mobile = seo.technical?.mobile || 0;
+      const url = `${API_BASE}/analyze-seo?action=ai-summary&url=${encodeURIComponent(seo.analyzedUrl)}&score=${seo.score}&performance=${seo.technical?.performance}&mobile=${seo.technical?.mobile}&issues=${encodeURIComponent(issues)}`;
 
-      const res = await fetch(
-        `${API_BASE}/analyze-seo?action=ai-summary&url=${encodeURIComponent(url)}&score=${score}&performance=${performance}&mobile=${mobile}&issues=${encodeURIComponent(issues)}`,
-      );
+      console.log("🤖 AI URL:", url);
+      const res = await fetch(url);
+      console.log("🤖 AI status:", res.status);
 
       if (!res.ok) throw new Error("AI analysis failed");
       const data = await res.json();
-
-      setAdvice(data);
+      console.log("🤖 AI data:", JSON.stringify(data));
+      setAdvice(data.summary || data.text || JSON.stringify(data));
     } catch (e) {
-      setError(e.message || "AI analysis failed. Please try again.");
+      console.error("🤖 AI error:", e);
+      setError("Could not load AI advice. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (!result?.seo) {
+  if (loading) {
     return (
-      <View style={globalStyles.empty}>
-        <Text style={globalStyles.emptyText}>Run an analysis first</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-          <Text style={globalStyles.backLink}>← Go to Home</Text>
+      <View style={{ alignItems: "center", paddingVertical: 40 }}>
+        <ActivityIndicator color={COLORS.primary} size="large" />
+        <Text style={{ color: COLORS.textMuted, marginTop: 16, fontSize: 14 }}>
+          AI analyzing your site...
+        </Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={{ alignItems: "center", paddingVertical: 20 }}>
+        <Text
+          style={{ color: COLORS.red, marginBottom: 16, textAlign: "center" }}
+        >
+          {error}
+        </Text>
+        <TouchableOpacity
+          onPress={() => {
+            hasFetched.current = false;
+            fetchAdvice();
+          }}
+          style={globalStyles.btn}
+        >
+          <Text style={globalStyles.btnText}>Try Again</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
+  if (!advice) return null;
+
   return (
-    <ScrollView
-      style={globalStyles.container}
-      contentContainerStyle={globalStyles.inner}
-    >
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={globalStyles.back}
+    <View style={{ gap: 16 }}>
+      <View
+        style={{
+          backgroundColor: COLORS.surface,
+          borderRadius: 16,
+          padding: 20,
+          borderWidth: 1,
+          borderColor: COLORS.border,
+          borderLeftWidth: 3,
+          borderLeftColor: COLORS.primary,
+        }}
       >
-        <Text style={globalStyles.backText}>← Back</Text>
-      </TouchableOpacity>
-
-      {/* Header */}
-      <View style={globalStyles.aiHeader}>
-        <View style={globalStyles.aiIconWrap}>
-          <Text style={globalStyles.aiIcon}>🤖</Text>
-        </View>
-        <View>
-          <Text style={globalStyles.aiTitle}>AI Social Media Advisor</Text>
-          <Text style={globalStyles.aiSubtitle}>Powered by DeepSeek AI</Text>
-        </View>
+        <Text style={{ fontSize: 14, color: COLORS.text, lineHeight: 24 }}>
+          {advice}
+        </Text>
       </View>
-
-      {loading && (
-        <View style={globalStyles.aiLoading}>
-          <ActivityIndicator color={COLORS.primary} size="large" />
-          <Text style={globalStyles.aiLoadingText}>
-            DeepSeek AI is analyzing...
-          </Text>
-        </View>
-      )}
-
-      {error && (
-        <View style={globalStyles.aiError}>
-          <Text style={globalStyles.error}>{error}</Text>
-          <TouchableOpacity onPress={fetchAdvice} style={globalStyles.btnWrap}>
-            <LinearGradient
-              colors={COLORS.primaryGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={globalStyles.btn}
-            >
-              <Text style={globalStyles.btnText}>Try Again</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {advice && !loading && (
-        <View style={globalStyles.aiContent}>
-          {/* AI Summary */}
-          {advice.summary && (
-            <View style={globalStyles.aiCard}>
-              <View style={globalStyles.aiCardHeader}>
-                <View style={globalStyles.aiCardBar} />
-                <Text style={globalStyles.aiCardTitle}>AI Summary</Text>
-              </View>
-              <Text style={globalStyles.aiCardText}>{advice.summary}</Text>
-            </View>
-          )}
-
-          {/* Recommendations */}
-          {advice.recommendations?.length > 0 && (
-            <View style={globalStyles.section}>
-              <Text style={globalStyles.sectionTitle}>
-                Actionable Recommendations
-              </Text>
-              {advice.recommendations.map((rec, i) => (
-                <View key={i} style={globalStyles.aiRecCard}>
-                  <View style={globalStyles.aiRecNum}>
-                    <Text style={globalStyles.aiRecNumText}>{i + 1}</Text>
-                  </View>
-                  <Text style={globalStyles.aiRecText}>{rec}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-
-          {/* Refresh */}
-          <TouchableOpacity onPress={fetchAdvice} style={globalStyles.btnWrap}>
-            <LinearGradient
-              colors={["#7c3aed", "#db2777"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={globalStyles.btn}
-            >
-              <Text style={globalStyles.btnText}>🔄 Refresh Analysis</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      )}
-    </ScrollView>
+      <TouchableOpacity
+        onPress={() => {
+          hasFetched.current = false;
+          fetchAdvice();
+        }}
+        style={globalStyles.btn}
+      >
+        <Text style={globalStyles.btnText}>🔄 Refresh Analysis</Text>
+      </TouchableOpacity>
+    </View>
   );
 }

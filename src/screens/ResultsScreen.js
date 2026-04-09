@@ -117,6 +117,8 @@ export default function ResultsScreen({ navigation, analysisHook }) {
   const score = seo.score || 0;
   const tech = seo.technical || {};
   const vitals = seo.coreWebVitals || {};
+  console.log("📊 Tech:", JSON.stringify(tech));
+  console.log("📊 Vitals:", JSON.stringify(vitals));
   const issues = seo.issues || [];
 
   const lcpVal = vitals.lcp?.displayValue || "--";
@@ -164,11 +166,12 @@ export default function ResultsScreen({ navigation, analysisHook }) {
             value={`${tech.mobile || "--"}%`}
             color={getColor(tech.mobile || 0)}
           />
+          // Replace tech.speed with tech.desktop:
           <ScoreCard
             icon="⚡"
-            label="Speed"
-            value={`${tech.speed || "--"}%`}
-            color={getColor(tech.speed || 0)}
+            label="Desktop"
+            value={`${tech.desktop || "--"}%`}
+            color={getColor(tech.desktop || 0)}
           />
           <ScoreCard
             icon="🔒"
