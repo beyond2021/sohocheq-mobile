@@ -19,6 +19,7 @@ import SocialScreen from "../screens/SocialScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import ResultsScreen from "../screens/ResultsScreen";
 import AIAdvisorScreen from "../screens/AIAdvisorScreen";
+import GrowthPlanScreen from "../screens/GrowthPlanScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -94,6 +95,11 @@ function HybridStackScreen({ authHook, hybridAnalysis }) {
           <AIAdvisorScreen {...props} analysisHook={hybridAnalysis} />
         )}
       </HybridStack.Screen>
+      <HybridStack.Screen name="GrowthPlan">
+        {(props) => (
+          <GrowthPlanScreen {...props} analysisHook={hybridAnalysis} />
+        )}
+      </HybridStack.Screen>
     </HybridStack.Navigator>
   );
 }
@@ -118,6 +124,16 @@ function WebsiteStackScreen({ authHook, websiteAnalysis }) {
           <AIAdvisorScreen {...props} analysisHook={websiteAnalysis} />
         )}
       </WebsiteStack.Screen>
+      <WebsiteStack.Screen name="GrowthPlan">
+        {(props) => (
+          <GrowthPlanScreen {...props} analysisHook={websiteAnalysis} />
+        )}
+      </WebsiteStack.Screen>
+      <SocialStack.Screen name="GrowthPlan">
+        {(props) => (
+          <GrowthPlanScreen {...props} analysisHook={socialAnalysis} />
+        )}
+      </SocialStack.Screen>
     </WebsiteStack.Navigator>
   );
 }
