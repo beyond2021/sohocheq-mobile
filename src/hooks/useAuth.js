@@ -7,6 +7,7 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   const [isProfessional, setIsProfessional] = useState(false);
+  const [profile, setProfile] = useState(null);
 
   const getDisplayName = (u) => {
     return (
@@ -20,7 +21,10 @@ export function useAuth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) loadUserTier(session.user.id);
+      if (session?.user) {
+        loadUserTier(session.user.id);
+        loadProfile(session.user.id);
+      }
       setLoading(false);
     });
 
@@ -29,12 +33,30 @@ export function useAuth() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) loadUserTier(session.user.id);
+      if (session?.user) {
+        loadUserTier(session.user.id);
+        loadProfile(session.user.id);
+      }
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const loadProfile = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from("user_profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      console.log("👤 Profile loaded:", JSON.stringify(data));
+      console.log("👤 Profile error:", JSON.stringify(error));
+      if (data) setProfile(data);
+    } catch (e) {
+      console.error("❌ Profile error:", e);
+    }
+  };
 
   const loadUserTier = async (userId) => {
     try {
@@ -43,7 +65,6 @@ export function useAuth() {
         .select("*, subscriptions(plan_tier, status)")
         .eq("id", userId)
         .single();
-
       if (data?.subscriptions?.length > 0) {
         const active = data.subscriptions.filter(
           (s) => s.status === "active" || s.status === "trialing",
@@ -70,25 +91,26 @@ export function useAuth() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { full_name: fullName },
-      },
+      options: { data: { full_name: fullName } },
     });
 
     if (!error && data?.user) {
-      await supabase.from("user_profiles").upsert(
+      const { error: fnError } = await supabase.functions.invoke(
+        "swift-service",
         {
-          user_id: data.user.id,
-          display_name: fullName,
-          website_url: handles.website_url || null,
-          instagram_handle: handles.instagram_handle || null,
-          twitter_handle: handles.twitter_handle || null,
-          tiktok_handle: handles.tiktok_handle || null,
-          youtube_handle: handles.youtube_handle || null,
-          updated_at: new Date().toISOString(),
+          body: {
+            user_id: data.user.id,
+            display_name: fullName,
+            website_url: handles.website_url || null,
+            instagram_handle: handles.instagram_handle || null,
+            twitter_handle: handles.twitter_handle || null,
+            tiktok_handle: handles.tiktok_handle || null,
+            youtube_handle: handles.youtube_handle || null,
+          },
         },
-        { onConflict: "user_id" },
       );
+      if (fnError) console.error("❌ Profile creation error:", fnError);
+      else console.log("✅ Profile created securely");
     }
 
     return { data, error };
@@ -98,6 +120,7 @@ export function useAuth() {
     await supabase.auth.signOut();
     setIsPremium(false);
     setIsProfessional(false);
+    setProfile(null);
   };
 
   const updateName = async (fullName) => {
@@ -105,6 +128,19 @@ export function useAuth() {
       data: { full_name: fullName },
     });
     if (!error && data?.user) setUser(data.user);
+    return { error };
+  };
+
+  const updateProfile = async (updates) => {
+    const { error } = await supabase.from("user_profiles").upsert(
+      {
+        user_id: user.id,
+        ...updates,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    );
+    if (!error) setProfile((prev) => ({ ...prev, ...updates }));
     return { error };
   };
 
@@ -118,6 +154,8 @@ export function useAuth() {
     signUp,
     signOut,
     updateName,
+    updateProfile,
     displayName: getDisplayName(user),
+    profile,
   };
 }

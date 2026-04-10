@@ -16,7 +16,9 @@ import { globalStyles } from "../styles";
 import AnimatedBackground from "../components/AnimatedBackground";
 
 export default function SettingsScreen({ authHook }) {
-  const { user, isPremium, isProfessional, signOut } = authHook;
+  const { user, isPremium, isProfessional, signOut, profile, updateProfile } =
+    authHook;
+    const [saving, setSaving] = useState(false);
 
   const tier = isProfessional ? "Professional" : isPremium ? "Premium" : "Free";
   const tierColor = isProfessional
@@ -27,6 +29,19 @@ export default function SettingsScreen({ authHook }) {
 
   const handleUpgrade = async () => {
     await WebBrowser.openBrowserAsync(STRIPE_UPGRADE_URL);
+  };
+
+  const handleUpdateHandles = async () => {
+    setSaving(true);
+    await updateProfile({
+      website_url: websiteUrl.trim(),
+      instagram_handle: instagram.replace("@", "").trim(),
+      twitter_handle: twitter.replace("@", "").trim(),
+      tiktok_handle: tiktok.replace("@", "").trim(),
+      youtube_handle: youtube.replace("@", "").trim(),
+    });
+    Alert.alert("Saved", "Your handles have been updated.");
+    setSaving(false);
   };
 
   const handleSignOut = () => {
@@ -113,6 +128,18 @@ export default function SettingsScreen({ authHook }) {
         {/* Sign Out */}
         <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
           <Text style={styles.signOutText}>Sign Out</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleUpdateHandles}
+          disabled={saving}
+          style={[globalStyles.btn, { marginTop: 4 }]}
+        >
+          {saving ? (
+            <ActivityIndicator color="#fd366e" />
+          ) : (
+            <Text style={globalStyles.btnText}>Save Handles</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
