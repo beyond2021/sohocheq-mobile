@@ -23,7 +23,7 @@ export function useAnalysis() {
     }
   };
 
-  const analyze = async ({ url, twitter, instagram, tiktok, youtube }) => {
+  const analyze = async ({ url, twitter, instagram, tiktok, youtube }, trophyHook) => {
     console.log("🤣 Hybrid is analyzing");
 
     setLoading(true);
@@ -173,6 +173,7 @@ export function useAnalysis() {
       setProgress(100);
       setStep("Analysis complete!");
       setResult({ seo: seoData, social: socialData, url: cleanUrl });
+      if (trophyHook) await trophyHook.saveAnalysis(seoData, socialData, cleanUrl);
       setReady(true);
     } catch (e) {
       setError(e.message || "Analysis failed. Please try again.");

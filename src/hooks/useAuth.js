@@ -66,7 +66,7 @@ export function useAuth() {
     return { data, error };
   };
 
-  const signUp = async (email, password, fullName) => {
+  const signUp = async (email, password, fullName, handles = {}) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -74,6 +74,23 @@ export function useAuth() {
         data: { full_name: fullName },
       },
     });
+
+    if (!error && data?.user) {
+      await supabase.from("user_profiles").upsert(
+        {
+          user_id: data.user.id,
+          display_name: fullName,
+          website_url: handles.website_url || null,
+          instagram_handle: handles.instagram_handle || null,
+          twitter_handle: handles.twitter_handle || null,
+          tiktok_handle: handles.tiktok_handle || null,
+          youtube_handle: handles.youtube_handle || null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" },
+      );
+    }
+
     return { data, error };
   };
 

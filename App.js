@@ -1,13 +1,14 @@
 import "react-native-gesture-handler";
 import React from "react";
 import { StatusBar } from "expo-status-bar";
-import { View } from 'react-native';
+import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useAuth } from "./src/hooks/useAuth";
 import { useAnalysis } from "./src/hooks/useAnalysis";
 import Navigation from "./src/navigation";
 import { useCallback } from "react";
 import * as SplashScreen from "expo-splash-screen";
+import { useTrophies } from "./src/hooks/useTrophies";
 import {
   useFonts,
   Syne_700Bold,
@@ -21,6 +22,12 @@ export default function App() {
   const hybridAnalysis = useAnalysis();
   const websiteAnalysis = useAnalysis();
   const socialAnalysis = useAnalysis();
+  const trophyHook = useTrophies(
+    authHook.user,
+    hybridAnalysis,
+    websiteAnalysis,
+    socialAnalysis,
+  );
 
   const [fontsLoaded] = useFonts({ Syne_700Bold, Syne_800ExtraBold });
 
@@ -38,6 +45,7 @@ export default function App() {
         hybridAnalysis={hybridAnalysis}
         websiteAnalysis={websiteAnalysis}
         socialAnalysis={socialAnalysis}
+        trophyHook={trophyHook}
       />
     </View>
   );

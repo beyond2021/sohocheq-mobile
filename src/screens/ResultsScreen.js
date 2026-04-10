@@ -253,12 +253,12 @@ export default function ResultsScreen({ navigation, analysisHook }) {
         <SocialContent analysisHook={analysisHook} />
       </BottomModal>
 
-      <TouchableOpacity
-        onPress={() => navigation.navigate("GrowthPlan")}
-        style={[globalStyles.btnWrap, { margin: 16 }]}
-      >
-        <Text style={globalStyles.btnText}>🌱 View Your Growth Plan →</Text>
-      </TouchableOpacity>
+      <ActionBar
+        onAI={() => setShowAI(true)}
+        onSocial={() => setShowSocial(true)}
+        onGrowth={() => navigation.navigate("GrowthPlan")}
+        hasSocial={!!result?.social && Object.keys(result.social).length > 0}
+      />
     </View>
   );
 }
