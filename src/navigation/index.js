@@ -119,21 +119,22 @@ function WebsiteStackScreen({ authHook, websiteAnalysis }) {
       <WebsiteStack.Screen name="Results">
         {(props) => <ResultsScreen {...props} analysisHook={websiteAnalysis} />}
       </WebsiteStack.Screen>
+      
       <WebsiteStack.Screen name="AIAdvisor">
         {(props) => (
           <AIAdvisorScreen {...props} analysisHook={websiteAnalysis} />
         )}
       </WebsiteStack.Screen>
+
+
+
+
       <WebsiteStack.Screen name="GrowthPlan">
         {(props) => (
           <GrowthPlanScreen {...props} analysisHook={websiteAnalysis} />
         )}
       </WebsiteStack.Screen>
-      <SocialStack.Screen name="GrowthPlan">
-        {(props) => (
-          <GrowthPlanScreen {...props} analysisHook={socialAnalysis} />
-        )}
-      </SocialStack.Screen>
+ 
     </WebsiteStack.Navigator>
   );
 }
@@ -158,6 +159,9 @@ function SocialStackScreen({ authHook, socialAnalysis }) {
     </SocialStack.Navigator>
   );
 }
+
+
+
 
 function MainTabs({
   authHook,

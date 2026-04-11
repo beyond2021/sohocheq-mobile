@@ -1,35 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
+  View, Text, ScrollView, TouchableOpacity,
+  Alert, KeyboardAvoidingView, Platform, ActivityIndicator,
 } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { COLORS, STRIPE_UPGRADE_URL } from "../constants";
 import { globalStyles } from "../styles";
-
 import AnimatedBackground from "../components/AnimatedBackground";
+import AnimatedInput from "../components/AnimatedInput";
 
 export default function SettingsScreen({ authHook }) {
-  const { user, isPremium, isProfessional, signOut, profile, updateProfile } =
-    authHook;
-    const [saving, setSaving] = useState(false);
+  const { user, isPremium, isProfessional, signOut, profile, updateProfile } = authHook;
+
+  const [websiteUrl, setWebsiteUrl] = useState(profile?.website_url || "");
+  const [instagram, setInstagram] = useState(profile?.instagram_handle || "");
+  const [twitter, setTwitter] = useState(profile?.twitter_handle || "");
+  const [tiktok, setTiktok] = useState(profile?.tiktok_handle || "");
+  const [youtube, setYoutube] = useState(profile?.youtube_handle || "");
+  const [saving, setSaving] = useState(false);
 
   const tier = isProfessional ? "Professional" : isPremium ? "Premium" : "Free";
-  const tierColor = isProfessional
-    ? COLORS.purple
-    : isPremium
-      ? COLORS.primary
-      : COLORS.textMuted;
-
-  const handleUpgrade = async () => {
-    await WebBrowser.openBrowserAsync(STRIPE_UPGRADE_URL);
-  };
+  const tierColor = isProfessional ? COLORS.purple : isPremium ? COLORS.primary : COLORS.textMuted;
 
   const handleUpdateHandles = async () => {
     setSaving(true);
@@ -52,192 +43,77 @@ export default function SettingsScreen({ authHook }) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={globalStyles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <KeyboardAvoidingView style={globalStyles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <AnimatedBackground />
-      <ScrollView style={styles.container} contentContainerStyle={styles.inner}>
-        <Text style={styles.title}>Account</Text>
+      <ScrollView contentContainerStyle={globalStyles.inner} showsVerticalScrollIndicator={false}>
+
+        <Text style={globalStyles.heroTitle}>Account</Text>
 
         {/* User Card */}
-        <View style={styles.card}>
-          <View style={styles.avatarWrap}>
-            <Text style={styles.avatarText}>
+        <View style={globalStyles.card}>
+          <View style={globalStyles.avatarWrap}>
+            <Text style={globalStyles.avatarLarge}>
               {user?.email?.charAt(0).toUpperCase()}
             </Text>
           </View>
-          <View style={styles.userInfo}>
-            <Text style={styles.email}>{user?.email}</Text>
-            <View
-              style={[styles.tierBadge, { backgroundColor: tierColor + "22" }]}
-            >
-              <Text style={[styles.tierText, { color: tierColor }]}>
-                {tier}
-              </Text>
+          <View style={globalStyles.userInfo}>
+            <Text style={globalStyles.email}>{user?.email}</Text>
+            <View style={[globalStyles.tierBadge, { backgroundColor: tierColor + "22" }]}>
+              <Text style={[globalStyles.tierText, { color: tierColor }]}>{tier}</Text>
             </View>
           </View>
         </View>
 
+        {/* My Website & Handles */}
+        <View style={globalStyles.section}>
+          <Text style={globalStyles.sectionLabel}>My Website & Handles</Text>
+          <Text style={{ fontSize: 12, color: COLORS.textFaint, marginBottom: 12, lineHeight: 18 }}>
+            Only analyses of these count toward your score and trophies
+          </Text>
+          <AnimatedInput label="Website" value={websiteUrl} onChangeText={setWebsiteUrl} placeholder="yourdomain.com" keyboardType="url" icon="🌐" />
+          <AnimatedInput label="Instagram" value={instagram} onChangeText={setInstagram} placeholder="handle" icon="📸" />
+          <AnimatedInput label="TikTok" value={tiktok} onChangeText={setTiktok} placeholder="handle" icon="🎵" />
+          <AnimatedInput label="Twitter / X" value={twitter} onChangeText={setTwitter} placeholder="handle" icon="𝕏" />
+          <AnimatedInput label="YouTube" value={youtube} onChangeText={setYoutube} placeholder="handle" icon="▶️" />
+          <TouchableOpacity onPress={handleUpdateHandles} disabled={saving} style={[globalStyles.btn, { marginTop: 4 }]}>
+            {saving ? <ActivityIndicator color="#fd366e" /> : <Text style={globalStyles.btnText}>Save Handles</Text>}
+          </TouchableOpacity>
+        </View>
+
         {/* Upgrade */}
         {!isProfessional && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Upgrade</Text>
-            <TouchableOpacity
-              style={styles.upgradeCard}
-              onPress={handleUpgrade}
-            >
-              <Text style={styles.upgradeTitle}>
-                {isPremium
-                  ? "⬆️ Upgrade to Professional"
-                  : "✦ Upgrade to Premium"}
+          <View style={globalStyles.section}>
+            <Text style={globalStyles.sectionLabel}>Upgrade</Text>
+            <TouchableOpacity style={globalStyles.upgradeCard} onPress={() => WebBrowser.openBrowserAsync(STRIPE_UPGRADE_URL)}>
+              <Text style={globalStyles.upgradeTitle}>
+                {isPremium ? "⬆️ Upgrade to Professional" : "✦ Upgrade to Premium"}
               </Text>
-              <Text style={styles.upgradePrice}>
-                {isPremium ? "$49/mo" : "$9.99/mo"}
-              </Text>
-              <Text style={styles.upgradeDesc}>
-                {isPremium
-                  ? "White-label reports, API access, priority support"
-                  : "Unlimited analyses, AI advisor, PDF export"}
+              <Text style={globalStyles.upgradePrice}>{isPremium ? "$49/mo" : "$9.99/mo"}</Text>
+              <Text style={globalStyles.upgradeDesc}>
+                {isPremium ? "White-label reports, API access, priority support" : "Unlimited analyses, AI advisor, PDF export"}
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
         {/* Links */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>More</Text>
-          <TouchableOpacity
-            style={styles.linkRow}
-            onPress={() => WebBrowser.openBrowserAsync("https://sohocheq.com")}
-          >
-            <Text style={styles.linkText}>Open Web App</Text>
-            <Text style={styles.linkChevron}>→</Text>
+        <View style={globalStyles.section}>
+          <Text style={globalStyles.sectionLabel}>More</Text>
+          <TouchableOpacity style={globalStyles.linkRow} onPress={() => WebBrowser.openBrowserAsync("https://sohocheq.com")}>
+            <Text style={globalStyles.linkText}>Open Web App</Text>
+            <Text style={globalStyles.linkChevron}>→</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.linkRow}
-            onPress={() =>
-              WebBrowser.openBrowserAsync("mailto:support@sohocheq.com")
-            }
-          >
-            <Text style={styles.linkText}>Contact Support</Text>
-            <Text style={styles.linkChevron}>→</Text>
+          <TouchableOpacity style={globalStyles.linkRow} onPress={() => WebBrowser.openBrowserAsync("mailto:support@sohocheq.com")}>
+            <Text style={globalStyles.linkText}>Contact Support</Text>
+            <Text style={globalStyles.linkChevron}>→</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Sign Out */}
-        <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
-          <Text style={styles.signOutText}>Sign Out</Text>
+        <TouchableOpacity style={globalStyles.signOutBtn} onPress={handleSignOut}>
+          <Text style={globalStyles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={handleUpdateHandles}
-          disabled={saving}
-          style={[globalStyles.btn, { marginTop: 4 }]}
-        >
-          {saving ? (
-            <ActivityIndicator color="#fd366e" />
-          ) : (
-            <Text style={globalStyles.btnText}>Save Handles</Text>
-          )}
-        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  inner: { padding: 20, paddingTop: 60, paddingBottom: 40 },
-  title: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: COLORS.text,
-    marginBottom: 24,
-  },
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 28,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  avatarWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 14,
-  },
-  avatarText: { color: "#fff", fontWeight: "900", fontSize: 20 },
-  userInfo: { flex: 1 },
-  email: {
-    color: COLORS.text,
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 6,
-  },
-  tierBadge: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 100,
-  },
-  tierText: { fontSize: 12, fontWeight: "700" },
-  section: { marginBottom: 24 },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: COLORS.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    marginBottom: 12,
-  },
-  upgradeCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: COLORS.primary + "44",
-  },
-  upgradeTitle: {
-    color: COLORS.text,
-    fontSize: 16,
-    fontWeight: "800",
-    marginBottom: 4,
-  },
-  upgradePrice: {
-    color: COLORS.primary,
-    fontSize: 24,
-    fontWeight: "900",
-    marginBottom: 8,
-  },
-  upgradeDesc: { color: COLORS.textMuted, fontSize: 13, lineHeight: 18 },
-  linkRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  linkText: { color: COLORS.text, fontSize: 15 },
-  linkChevron: { color: COLORS.textMuted, fontSize: 16 },
-  signOutBtn: {
-    marginTop: 12,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.red + "44",
-    alignItems: "center",
-  },
-  signOutText: { color: COLORS.red, fontSize: 15, fontWeight: "700" },
-});

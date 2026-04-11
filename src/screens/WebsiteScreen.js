@@ -23,10 +23,6 @@ export default function WebsiteScreen({ navigation, analysisHook, authHook }) {
   useEffect(() => {
     if (profile) {
       if (profile.website_url) setUrl(profile.website_url);
-      if (profile.instagram_handle) setInstagram(profile.instagram_handle);
-      if (profile.twitter_handle) setTwitter(profile.twitter_handle);
-      if (profile.tiktok_handle) setTiktok(profile.tiktok_handle);
-      if (profile.youtube_handle) setYoutube(profile.youtube_handle);
     }
   }, [profile]);
 
