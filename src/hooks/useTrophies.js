@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 
 export const TROPHY_DEFINITIONS = [
+  // Website trophies
   {
     key: "speed_demon",
     name: "Speed Demon",
@@ -44,6 +45,8 @@ export const TROPHY_DEFINITIONS = [
     description: "Overall score 100",
     category: "website",
   },
+
+  // Social trophies
   {
     key: "first_1k",
     name: "First 1K",
@@ -87,6 +90,36 @@ export const TROPHY_DEFINITIONS = [
     category: "social",
   },
   {
+    key: "full_house",
+    name: "Full House",
+    emoji: "✅✅",
+    description: "Verified on all active platforms",
+    category: "social",
+  },
+  {
+    key: "engagement_king",
+    name: "Engagement King",
+    emoji: "👊",
+    description: "Engagement rate above 5%",
+    category: "social",
+  },
+  {
+    key: "content_machine",
+    name: "Content Machine",
+    emoji: "🎬",
+    description: "100+ posts on any platform",
+    category: "social",
+  },
+  {
+    key: "growing_fast",
+    name: "Growing Fast",
+    emoji: "📊",
+    description: "Grew followers 10% since last check",
+    category: "social",
+  },
+
+  // Growth trophies
+  {
     key: "first_analysis",
     name: "First Check",
     emoji: "🎯",
@@ -107,6 +140,15 @@ export const TROPHY_DEFINITIONS = [
     description: "10 meaningful improvements",
     category: "progress",
   },
+  {
+    key: "big_jump",
+    name: "Big Jump",
+    emoji: "🚀",
+    description: "Score improved 20+ points in one check",
+    category: "progress",
+  },
+
+  // Streak trophies
   {
     key: "on_fire",
     name: "On Fire",
@@ -318,10 +360,18 @@ function shouldSave(
   return false;
 }
 
-function evaluateTrophies(seo, social, savedCount) {
+function evaluateTrophies(
+  seo,
+  social,
+  savedCount,
+  previousScore,
+  previousSocial,
+) {
   const earned = [];
   const tech = seo?.technical || {};
   const vitals = seo?.coreWebVitals || {};
+
+  // Website trophies
   if (vitals.lcp?.displayValue && parseFloat(vitals.lcp.displayValue) < 2.5)
     earned.push("speed_demon");
   if (tech.security >= 100) earned.push("fort_knox");
@@ -329,25 +379,75 @@ function evaluateTrophies(seo, social, savedCount) {
   if ((seo?.score || 0) >= 80) earned.push("seo_star");
   if (tech.performance >= 90) earned.push("rocket_ship");
   if ((seo?.score || 0) >= 100) earned.push("perfect_score");
+
+  // Score jump
+  if (previousScore !== null && seo?.score && seo.score - previousScore >= 20) {
+    earned.push("big_jump");
+  }
+
   if (social) {
     const platforms = Object.values(social);
+
     const maxFollowers = Math.max(
       ...platforms.map(
         (p) => p.profileData?.followers || p.followers || p.subscribers || 0,
       ),
     );
-    const activePlatforms = platforms.filter((p) => p.exists !== false).length;
-    const isVerified = platforms.some((p) => p.verified);
+
+    const activePlatforms = platforms.filter((p) => p.exists !== false);
+    const activePlatformCount = activePlatforms.length;
+    const verifiedPlatforms = activePlatforms.filter((p) => p.verified);
+    const isAnyVerified = verifiedPlatforms.length > 0;
+    const isAllVerified =
+      activePlatformCount > 0 &&
+      verifiedPlatforms.length === activePlatformCount;
+
+    // Follower milestones
     if (maxFollowers >= 1000) earned.push("first_1k");
     if (maxFollowers >= 10000) earned.push("ten_k_club");
     if (maxFollowers >= 100000) earned.push("hundred_k");
     if (maxFollowers >= 1000000) earned.push("million_club");
-    if (activePlatforms >= 3) earned.push("multi_platform");
-    if (isVerified) earned.push("verified");
+
+    // Platform trophies
+    if (activePlatformCount >= 3) earned.push("multi_platform");
+    if (isAnyVerified) earned.push("verified");
+    if (isAllVerified && activePlatformCount >= 2) earned.push("full_house");
+
+    // Engagement rate — Instagram specific
+    const ig = social.instagram;
+    if (ig?.engagement?.engagementRate) {
+      const rate = parseFloat(ig.engagement.engagementRate);
+      if (rate >= 5) earned.push("engagement_king");
+    }
+
+    // Content machine — 100+ posts on any platform
+    const maxPosts = Math.max(
+      social.instagram?.posts || 0,
+      social.twitter?.tweets || 0,
+      social.tiktok?.videos || 0,
+      social.youtube?.videos || social.youtube?.videoCount || 0,
+    );
+    if (maxPosts >= 100) earned.push("content_machine");
+
+    // Growing fast — 10% follower growth since last check
+    if (previousSocial) {
+      const prevPlatforms = Object.values(previousSocial);
+      const prevMaxFollowers = Math.max(
+        ...prevPlatforms.map(
+          (p) => p.profileData?.followers || p.followers || p.subscribers || 0,
+        ),
+      );
+      if (prevMaxFollowers > 0 && maxFollowers >= prevMaxFollowers * 1.1) {
+        earned.push("growing_fast");
+      }
+    }
   }
+
+  // Progress trophies
   if (savedCount >= 1) earned.push("first_analysis");
   if (savedCount >= 5) earned.push("five_saves");
   if (savedCount >= 10) earned.push("ten_saves");
+
   return earned;
 }
 
@@ -492,7 +592,8 @@ export function useTrophies(
   };
 
   const saveProgress = async (seo, social, url) => {
-    try {
+    ß
+            try {
       const score = calculateScore(seo, social);
       const previousScore = lastAnalysis?.score ?? null;
       const previousSocial = lastAnalysis?.social_data ?? null;
@@ -501,7 +602,13 @@ export function useTrophies(
       const persona = getPersona(websiteScore, socialScore);
       const level = getLevel(score);
 
-      const earnedKeys = evaluateTrophies(seo, social, savedCount + 1);
+      const earnedKeys = evaluateTrophies(
+        seo,
+        social,
+        savedCount + 1,
+        previousScore,
+        previousSocial,
+      );
       const existingKeys = trophies.map((t) => t.trophy_key);
       const newKeys = earnedKeys.filter((k) => !existingKeys.includes(k));
       const newDefs = TROPHY_DEFINITIONS.filter((d) => newKeys.includes(d.key));

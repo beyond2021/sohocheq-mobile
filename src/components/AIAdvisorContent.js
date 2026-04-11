@@ -11,7 +11,7 @@ export default function AIAdvisorContent({ analysisHook }) {
   const hasFetched = useRef(false);
 
   useEffect(() => {
-    if (result?.seo && !hasFetched.current) {
+    if ((result?.seo || result?.social) && !hasFetched.current) {
       hasFetched.current = true;
       fetchAdvice();
     }
@@ -21,24 +21,40 @@ export default function AIAdvisorContent({ analysisHook }) {
     setLoading(true);
     setError(null);
     try {
-      const seo = result.seo;
-      const prompt = `Website: ${seo.analyzedUrl}. Score: ${seo.score}/100. Performance: ${seo.technical?.performance}. Mobile: ${seo.technical?.mobile}. Issues: ${seo.issues?.slice(0, 3).join(", ")}. Give 3 specific actionable recommendations to improve this website's SEO and performance. Be concise.`;
+      const seo = result?.seo;
+      const social = result?.social;
 
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 500,
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
+      const issues = seo?.issues?.slice(0, 3).join(", ") || "No major issues";
 
+      // Build social summary
+      const socialSummary = social
+        ? Object.entries(social)
+            .map(([platform, data]) => {
+              const followers = data.followers || data.subscribers || 0;
+              const posts = data.videos || data.tweets || data.posts || 0;
+              return `${platform}: ${followers.toLocaleString()} followers, ${posts} posts`;
+            })
+            .join(". ")
+        : "No social data";
+
+      const url =
+        `${API_BASE}/analyze-seo?action=ai-summary` +
+        `&url=${encodeURIComponent(seo?.analyzedUrl || "unknown")}` +
+        `&score=${seo?.score || 0}` +
+        `&performance=${seo?.technical?.performance || 0}` +
+        `&mobile=${seo?.technical?.mobile || 0}` +
+        `&issues=${encodeURIComponent(issues)}` +
+        `&social=${encodeURIComponent(socialSummary)}`;
+
+      console.log("🤖 AI URL:", url);
+      const res = await fetch(url);
+      console.log("🤖 AI status:", res.status);
       if (!res.ok) throw new Error("AI analysis failed");
       const data = await res.json();
-      const text = data.content?.[0]?.text || "";
-      setAdvice(text);
+      setAdvice(data.summary || data.text || null);
+      if (!data.summary && !data.text) throw new Error("No advice returned");
     } catch (e) {
+      console.error("🤖 AI error:", e);
       setError("Could not load AI advice. Try again.");
     } finally {
       setLoading(false);
@@ -85,9 +101,11 @@ export default function AIAdvisorContent({ analysisHook }) {
         style={{
           backgroundColor: COLORS.surface,
           borderRadius: 16,
-          padding: 16,
+          padding: 20,
           borderWidth: 1,
           borderColor: COLORS.border,
+          borderLeftWidth: 3,
+          borderLeftColor: COLORS.primary,
         }}
       >
         <Text style={{ fontSize: 14, color: COLORS.text, lineHeight: 24 }}>
