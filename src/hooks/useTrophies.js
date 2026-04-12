@@ -444,7 +444,7 @@ function evaluateTrophies(
   }
 
   // Progress trophies
-  if (savedCount >= 1) earned.push("first_analysis");
+  if (savedCount === 1) earned.push("first_analysis");
   if (savedCount >= 5) earned.push("five_saves");
   if (savedCount >= 10) earned.push("ten_saves");
 
@@ -467,7 +467,7 @@ export function useTrophies(
 
   useEffect(() => {
     if (user) loadData();
-  }, [user]);
+  }, [user?.id]);
 
   // Watch all three analysis hooks
   useEffect(() => {
@@ -513,23 +513,29 @@ export function useTrophies(
         await Promise.all([
           supabase
             .from("user_trophies")
-            .select("*")
+            .select("trophy_key, earned_at")
             .eq("user_id", user.id)
             .order("earned_at", { ascending: false }),
           supabase
             .from("user_streaks")
-            .select("*")
+            .select(
+              "current_streak, longest_streak, last_check_date, streak_label",
+            )
             .eq("user_id", user.id)
             .single(),
           supabase
             .from("user_analyses")
-            .select("*")
+            .select(
+              "id, score, previous_score, social_data, analyzed_at, persona, level",
+            )
             .eq("user_id", user.id)
             .order("analyzed_at", { ascending: false })
             .limit(1),
           supabase
             .from("user_profiles")
-            .select("*")
+            .select(
+              "display_name, avatar_url, best_score, analysis_count_today, last_analysis_date, website_url, instagram_handle, twitter_handle, tiktok_handle, youtube_handle",
+            )
             .eq("user_id", user.id)
             .single(),
           supabase
@@ -537,7 +543,16 @@ export function useTrophies(
             .select("*", { count: "exact", head: true })
             .eq("user_id", user.id),
         ]);
-      if (trophyRes.data) setTrophies(trophyRes.data);
+
+      // Merge trophy keys with app definitions
+      const earned = (trophyRes.data || [])
+        .map((row) => ({
+          ...TROPHY_DEFINITIONS.find((d) => d.key === row.trophy_key),
+          earned_at: row.earned_at,
+        }))
+        .filter(Boolean);
+      setTrophies(earned);
+
       if (streakRes.data) setStreak(streakRes.data);
       if (analysisRes.data?.[0]) setLastAnalysis(analysisRes.data[0]);
       if (profileRes.data) setProfile(profileRes.data);
@@ -592,8 +607,7 @@ export function useTrophies(
   };
 
   const saveProgress = async (seo, social, url) => {
-    ß
-            try {
+    try {
       const score = calculateScore(seo, social);
       const previousScore = lastAnalysis?.score ?? null;
       const previousSocial = lastAnalysis?.social_data ?? null;
@@ -609,7 +623,7 @@ export function useTrophies(
         previousScore,
         previousSocial,
       );
-      const existingKeys = trophies.map((t) => t.trophy_key);
+      const existingKeys = trophies.map((t) => t.key);
       const newKeys = earnedKeys.filter((k) => !existingKeys.includes(k));
       const newDefs = TROPHY_DEFINITIONS.filter((d) => newKeys.includes(d.key));
 
@@ -648,21 +662,48 @@ export function useTrophies(
       setLastAnalysis({ score, social_data: social });
 
       // Award trophies
+      // if (newDefs.length > 0) {
+      //   const inserts = newDefs.map((d) => ({
+      //     user_id: user.id,
+      //     trophy_key: d.key,
+      //     trophy_name: d.name,
+      //     trophy_emoji: d.emoji,
+      //     trophy_description: d.description,
+      //   }));
+      //   const { data: awarded } = await supabase
+      //     .from("user_trophies")
+      //     .upsert(inserts, { onConflict: "user_id,trophy_key" })
+      //     .select();
+      //   if (awarded?.length > 0) {
+      //     setTrophies((prev) => [...awarded, ...prev]);
+      //     setNewTrophies(awarded);
+      //     setTimeout(() => setNewTrophies([]), 5000);
+      //   }
+      // }
+
       if (newDefs.length > 0) {
         const inserts = newDefs.map((d) => ({
           user_id: user.id,
           trophy_key: d.key,
-          trophy_name: d.name,
-          trophy_emoji: d.emoji,
-          trophy_description: d.description,
         }));
-        const { data: awarded } = await supabase
+
+        const { data: awarded, error } = await supabase
           .from("user_trophies")
           .upsert(inserts, { onConflict: "user_id,trophy_key" })
           .select();
+
+        console.log("🏆 Awarded:", awarded?.length, error);
+
         if (awarded?.length > 0) {
-          setTrophies((prev) => [...awarded, ...prev]);
-          setNewTrophies(awarded);
+          const newEarned = awarded
+            .map((row) => ({
+              ...TROPHY_DEFINITIONS.find((d) => d.key === row.trophy_key),
+              earned_at: row.earned_at,
+            }))
+            .filter(Boolean);
+
+          setTrophies((prev) => [...newEarned, ...prev]);
+          setNewTrophies(newEarned);
           setTimeout(() => setNewTrophies([]), 5000);
         }
       }
