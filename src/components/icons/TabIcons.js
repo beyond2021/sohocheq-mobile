@@ -95,6 +95,36 @@ export function SocialIcon({ color = "#fd366e", size = 26 }) {
   );
 }
 
+export function TrafficIcon({ color = "#fd366e", size = 26 }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 32 32">
+      <Path
+        d="M5 24 Q10 18 15 20 Q20 22 27 10"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M22 10 L27 10 L27 15"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M5 28 L27 28"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
 export function SettingsIcon({ color = "#fd366e", size = 26 }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 32 32">

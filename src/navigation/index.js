@@ -1,14 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  useNavigationContainerRef,
+} from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants";
 import {
   HybridIcon,
   WebsiteIcon,
   SocialIcon,
+  TrafficIcon,
   SettingsIcon,
 } from "../components/icons/TabIcons";
 
@@ -17,6 +20,7 @@ import HybridScreen from "../screens/HybridScreen";
 import WebsiteScreen from "../screens/WebsiteScreen";
 import SocialScreen from "../screens/SocialScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import TrafficScreen from "../screens/TrafficScreen";
 import ResultsScreen from "../screens/ResultsScreen";
 import AIAdvisorScreen from "../screens/AIAdvisorScreen";
 import GrowthPlanScreen from "../screens/GrowthPlanScreen";
@@ -32,6 +36,7 @@ function TabBar({ state, descriptors, navigation }) {
     { name: "Hybrid", Icon: HybridIcon, label: "Hybrid" },
     { name: "Website", Icon: WebsiteIcon, label: "Website" },
     { name: "Social", Icon: SocialIcon, label: "Social" },
+    { name: "Traffic", Icon: TrafficIcon, label: "Traffic" },
     { name: "Settings", Icon: SettingsIcon, label: "Settings" },
   ];
 
@@ -57,10 +62,10 @@ function TabBar({ state, descriptors, navigation }) {
             style={{ flex: 1, alignItems: "center", paddingVertical: 8 }}
             activeOpacity={0.8}
           >
-            <tab.Icon color={color} size={24} />
+            <tab.Icon color={color} size={22} />
             <Text
               style={{
-                fontSize: 10,
+                fontSize: 9,
                 fontWeight: focused ? "700" : "600",
                 color,
                 marginTop: 4,
@@ -119,22 +124,16 @@ function WebsiteStackScreen({ authHook, websiteAnalysis }) {
       <WebsiteStack.Screen name="Results">
         {(props) => <ResultsScreen {...props} analysisHook={websiteAnalysis} />}
       </WebsiteStack.Screen>
-      
       <WebsiteStack.Screen name="AIAdvisor">
         {(props) => (
           <AIAdvisorScreen {...props} analysisHook={websiteAnalysis} />
         )}
       </WebsiteStack.Screen>
-
-
-
-
       <WebsiteStack.Screen name="GrowthPlan">
         {(props) => (
           <GrowthPlanScreen {...props} analysisHook={websiteAnalysis} />
         )}
       </WebsiteStack.Screen>
- 
     </WebsiteStack.Navigator>
   );
 }
@@ -159,9 +158,6 @@ function SocialStackScreen({ authHook, socialAnalysis }) {
     </SocialStack.Navigator>
   );
 }
-
-
-
 
 function MainTabs({
   authHook,
@@ -202,6 +198,9 @@ function MainTabs({
           />
         )}
       </Tab.Screen>
+      <Tab.Screen name="Traffic">
+        {(props) => <TrafficScreen {...props} authHook={authHook} />}
+      </Tab.Screen>
       <Tab.Screen name="Settings">
         {(props) => <SettingsScreen {...props} authHook={authHook} />}
       </Tab.Screen>
@@ -216,10 +215,27 @@ export default function Navigation({
   socialAnalysis,
 }) {
   const { user, loading } = authHook;
-  if (loading === true) return null;
+  const navigationRef = useNavigationContainerRef();
+
+  // Fix: when user is deleted or signed out from anywhere (website, Supabase),
+  // always reset navigation to Auth screen immediately
+  useEffect(() => {
+    if (!loading && !user && navigationRef.isReady()) {
+      navigationRef.reset({ index: 0, routes: [{ name: "Auth" }] });
+    }
+  }, [user, loading]);
+
+  // Fix: when user signs in, reset all stacks back to Hybrid home
+  useEffect(() => {
+    if (!loading && user && navigationRef.isReady()) {
+      navigationRef.reset({ index: 0, routes: [{ name: "Main" }] });
+    }
+  }, [user?.id]);
+
+  if (loading) return null;
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!user ? (
           <Stack.Screen name="Auth">
