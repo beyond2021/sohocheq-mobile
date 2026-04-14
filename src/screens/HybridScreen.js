@@ -5,16 +5,18 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants";
 import { globalStyles } from "../styles";
 import AnimatedInput from "../components/AnimatedInput";
 import SkeletonCard from "../components/SkeletonCard";
 import AnimatedBackground from "../components/AnimatedBackground";
+import BottomModal from "../components/BottomModal";
+import DailyBriefCard from "../components/DailyBriefCard";
+import { useDailyBrief } from "../hooks/useDailyBrief";
 
 export default function HybridScreen({ navigation, analysisHook, authHook }) {
   const [url, setUrl] = useState("");
@@ -22,23 +24,26 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
   const [instagram, setInstagram] = useState("");
   const [tiktok, setTiktok] = useState("");
   const [youtube, setYoutube] = useState("");
+  const [showBrief, setShowBrief] = useState(false);
 
   const { analyze, loading, result, error, ready, step } = analysisHook;
-  const { user, displayName, profile } = authHook;
-  useEffect(() => {
-  if (profile) {
-    if (profile.website_url) setUrl(profile.website_url);
-    if (profile.instagram_handle) setInstagram(profile.instagram_handle);
-    if (profile.twitter_handle) setTwitter(profile.twitter_handle);
-    if (profile.tiktok_handle) setTiktok(profile.tiktok_handle);
-    if (profile.youtube_handle) setYoutube(profile.youtube_handle);
-  }
-}, [profile]);
+  const { user, displayName, profile, isPremium, isProfessional } = authHook;
+
+  const briefHook = useDailyBrief(user, isPremium, isProfessional);
+  const hasUnread = briefHook.brief && !briefHook.hasRead;
 
   useEffect(() => {
-    if (ready === true && result !== null) {
-      navigation.navigate("Results");
+    if (profile) {
+      if (profile.website_url) setUrl(profile.website_url);
+      if (profile.instagram_handle) setInstagram(profile.instagram_handle);
+      if (profile.twitter_handle) setTwitter(profile.twitter_handle);
+      if (profile.tiktok_handle) setTiktok(profile.tiktok_handle);
+      if (profile.youtube_handle) setYoutube(profile.youtube_handle);
     }
+  }, [profile]);
+
+  useEffect(() => {
+    if (ready === true && result !== null) navigation.navigate("Results");
   }, [ready, result]);
 
   const handleAnalyze = () => {
@@ -47,7 +52,6 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
     analyze({ url: trimmedUrl, twitter, instagram, tiktok, youtube });
   };
 
-  // ── Skeleton loading state ──
   if (loading) {
     return (
       <ScrollView
@@ -62,7 +66,6 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
             resizeMode="contain"
           />
         </View>
-
         <Text
           style={{
             color: COLORS.primary,
@@ -76,7 +79,6 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
         >
           {step || "Analyzing..."}
         </Text>
-
         <View style={{ alignItems: "center", marginBottom: 32 }}>
           <SkeletonCard
             height={140}
@@ -102,10 +104,8 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
           <SkeletonCard height={110} style={{ width: "47%" }} />
           <SkeletonCard height={110} style={{ width: "47%" }} />
         </View>
-
         <SkeletonCard height={180} />
         <SkeletonCard height={58} style={{ marginTop: 12 }} />
-
         <TouchableOpacity
           onPress={() => analysisHook.reset()}
           style={{ marginTop: 16, alignItems: "center" }}
@@ -118,13 +118,13 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
     );
   }
 
-  // ── Form ──
   return (
     <KeyboardAvoidingView
       style={globalStyles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <AnimatedBackground />
+
       <ScrollView
         contentContainerStyle={globalStyles.inner}
         keyboardShouldPersistTaps="handled"
@@ -210,6 +210,55 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
           Social media earnings calculator · Influencer earnings per post
         </Text>
       </ScrollView>
+
+      {/* Floating Daily Brief Button */}
+      {user && briefHook.brief && (
+        <TouchableOpacity
+          style={styles.floatingBtn}
+          onPress={() => setShowBrief(true)}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.floatingIcon}>📡</Text>
+          {hasUnread && <View style={styles.unreadDot} />}
+        </TouchableOpacity>
+      )}
+
+      {/* Daily Brief Modal */}
+      <BottomModal
+        visible={showBrief}
+        onClose={() => setShowBrief(false)}
+        title="Daily Intel"
+      >
+        <DailyBriefCard briefHook={briefHook} />
+      </BottomModal>
     </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  floatingBtn: {
+    position: "absolute",
+    bottom: 32,
+    right: 20,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "rgba(253,54,110,0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(253,54,110,0.4)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  floatingIcon: { fontSize: 22 },
+  unreadDot: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#fd366e",
+    borderWidth: 2,
+    borderColor: "#0d0d14",
+  },
+});
