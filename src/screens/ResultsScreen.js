@@ -226,13 +226,6 @@ export default function ResultsScreen({ navigation, analysisHook }) {
       </ScrollView>
 
       {/* Action Bar */}
-      <ActionBar
-        onResults={() => {}}
-        onAI={() => setShowAI(true)}
-        onSocial={() => setShowSocial(true)}
-        hasResults={!!result?.seo}
-        hasSocial={!!result?.social && Object.keys(result.social).length > 0}
-      />
 
       {/* AI Modal */}
       <BottomModal
