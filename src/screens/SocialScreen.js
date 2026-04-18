@@ -212,14 +212,16 @@ export default function SocialScreen({
   const [instagram, setInstagram] = useState("");
   const [tiktok, setTiktok] = useState("");
   const [youtube, setYoutube] = useState("");
+  const [url, setUrl] = useState("");
 
   const { analyze, loading, result, error, ready, reset, step } = analysisHook;
-  const { user, displayName, profile } = authHook;
+  const { user, displayName, profile, session } = authHook;
   const trophies = trophyHook?.trophies || [];
 
   const social = result?.social;
   useEffect(() => {
     if (profile) {
+      if (profile.website_url) setUrl(profile.website_url);
       if (profile.instagram_handle) setInstagram(profile.instagram_handle);
       if (profile.twitter_handle) setTwitter(profile.twitter_handle);
       if (profile.tiktok_handle) setTiktok(profile.tiktok_handle);
@@ -234,16 +236,13 @@ export default function SocialScreen({
   }, [ready]);
 
   const handleAnalyze = () => {
-    const hasHandles = [twitter, instagram, tiktok, youtube].some((h) =>
-      h?.trim(),
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) return;
+    analyze(
+      { url: trimmedUrl, twitter, instagram, tiktok, youtube },
+      session?.access_token,
+      trophyHook,
     );
-    if (!hasHandles) return;
-    analyze({
-      twitter,
-      instagram,
-      tiktok,
-      youtube,
-    });
   };
 
   const handleReset = () => {
