@@ -58,22 +58,61 @@ export function useAuth() {
     }
   };
 
+  // const loadUserTier = async (userId) => {
+  //   try {
+  //     const { data } = await supabase
+  //       .from("users")
+  //       .select("*, subscriptions(plan_tier, status)")
+  //       .eq("id", userId)
+  //       .single();
+  //     if (data?.subscriptions?.length > 0) {
+  //       const active = data.subscriptions.filter(
+  //         (s) => s.status === "active" || s.status === "trialing",
+  //       );
+  //       const hasPro = active.some((s) => s.plan_tier === "professional");
+  //       const hasPremium = active.some((s) => s.plan_tier === "premium");
+  //       setIsProfessional(hasPro);
+  //       setIsPremium(hasPro || hasPremium);
+  //     }
+  //   } catch (e) {
+  //     console.error("Error loading tier:", e);
+  //   }
+  // };
+
   const loadUserTier = async (userId) => {
     try {
-      const { data } = await supabase
+      // Step 1 — get users table (same as website)
+      const { data, error } = await supabase
         .from("users")
-        .select("*, subscriptions(plan_tier, status)")
+        .select("*")
         .eq("id", userId)
         .single();
-      if (data?.subscriptions?.length > 0) {
-        const active = data.subscriptions.filter(
-          (s) => s.status === "active" || s.status === "trialing",
-        );
-        const hasPro = active.some((s) => s.plan_tier === "professional");
-        const hasPremium = active.some((s) => s.plan_tier === "premium");
-        setIsProfessional(hasPro);
-        setIsPremium(hasPro || hasPremium);
+
+      if (error) {
+        console.warn("⚠️ User not in DB:", error.message);
+        return;
       }
+
+      // Step 2 — start with is_premium flag (same as website)
+      let highestTier = data.is_premium ? "premium" : null;
+
+      // Step 3 — check subscriptions for professional (same as website)
+      const { data: subs } = await supabase
+        .from("subscriptions")
+        .select("plan_tier, stripe_price_id, status")
+        .eq("user_id", userId);
+
+      if (subs && subs.length > 0) {
+        const hasPro = subs.find((s) => s.plan_tier === "professional");
+        if (hasPro) {
+          highestTier = "professional";
+        }
+      }
+
+      console.log("🎯 Mobile tier:", highestTier);
+
+      setIsProfessional(highestTier === "professional");
+      setIsPremium(highestTier === "professional" || highestTier === "premium");
     } catch (e) {
       console.error("Error loading tier:", e);
     }
