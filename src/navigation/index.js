@@ -25,6 +25,7 @@ import ResultsScreen from "../screens/ResultsScreen";
 import AIAdvisorScreen from "../screens/AIAdvisorScreen";
 import GrowthPlanScreen from "../screens/GrowthPlanScreen";
 
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const HybridStack = createNativeStackNavigator();
@@ -80,7 +81,7 @@ function TabBar({ state, descriptors, navigation }) {
   );
 }
 
-function HybridStackScreen({ authHook, hybridAnalysis }) {
+function HybridStackScreen({ authHook, hybridAnalysis, trophyHook }) {
   return (
     <HybridStack.Navigator screenOptions={{ headerShown: false }}>
       <HybridStack.Screen name="HybridHome">
@@ -89,6 +90,7 @@ function HybridStackScreen({ authHook, hybridAnalysis }) {
             {...props}
             authHook={authHook}
             analysisHook={hybridAnalysis}
+            trophyHook={trophyHook}
           />
         )}
       </HybridStack.Screen>
@@ -109,7 +111,7 @@ function HybridStackScreen({ authHook, hybridAnalysis }) {
   );
 }
 
-function WebsiteStackScreen({ authHook, websiteAnalysis }) {
+function WebsiteStackScreen({ authHook, websiteAnalysis, trophyHook }) {
   return (
     <WebsiteStack.Navigator screenOptions={{ headerShown: false }}>
       <WebsiteStack.Screen name="WebsiteHome">
@@ -118,6 +120,7 @@ function WebsiteStackScreen({ authHook, websiteAnalysis }) {
             {...props}
             authHook={authHook}
             analysisHook={websiteAnalysis}
+            trophyHook={trophyHook}
           />
         )}
       </WebsiteStack.Screen>
@@ -138,7 +141,7 @@ function WebsiteStackScreen({ authHook, websiteAnalysis }) {
   );
 }
 
-function SocialStackScreen({ authHook, socialAnalysis }) {
+function SocialStackScreen({ authHook, socialAnalysis, trophyHook }) {
   return (
     <SocialStack.Navigator screenOptions={{ headerShown: false }}>
       <SocialStack.Screen name="SocialHome">
@@ -147,6 +150,7 @@ function SocialStackScreen({ authHook, socialAnalysis }) {
             {...props}
             authHook={authHook}
             analysisHook={socialAnalysis}
+            trophyHook={trophyHook}
           />
         )}
       </SocialStack.Screen>
@@ -164,6 +168,7 @@ function MainTabs({
   hybridAnalysis,
   websiteAnalysis,
   socialAnalysis,
+  trophyHook,
 }) {
   return (
     <Tab.Navigator
@@ -177,6 +182,7 @@ function MainTabs({
             {...props}
             authHook={authHook}
             hybridAnalysis={hybridAnalysis}
+            trophyHook={trophyHook}
           />
         )}
       </Tab.Screen>
@@ -186,6 +192,7 @@ function MainTabs({
             {...props}
             authHook={authHook}
             websiteAnalysis={websiteAnalysis}
+            trophyHook={trophyHook}
           />
         )}
       </Tab.Screen>
@@ -195,6 +202,7 @@ function MainTabs({
             {...props}
             authHook={authHook}
             socialAnalysis={socialAnalysis}
+            trophyHook={trophyHook}
           />
         )}
       </Tab.Screen>
@@ -202,7 +210,13 @@ function MainTabs({
         {(props) => <TrafficScreen {...props} authHook={authHook} />}
       </Tab.Screen>
       <Tab.Screen name="Settings">
-        {(props) => <SettingsScreen {...props} authHook={authHook} />}
+        {(props) => (
+          <SettingsScreen
+            {...props}
+            authHook={authHook}
+            trophyHook={trophyHook}
+          />
+        )}
       </Tab.Screen>
     </Tab.Navigator>
   );
@@ -213,6 +227,7 @@ export default function Navigation({
   hybridAnalysis,
   websiteAnalysis,
   socialAnalysis,
+  trophyHook,
 }) {
   const { user, loading } = authHook;
   const navigationRef = useNavigationContainerRef();
@@ -233,6 +248,7 @@ export default function Navigation({
   }, [user?.id]);
 
   if (loading) return null;
+  // How the hooks are passed to each screen
 
   return (
     <NavigationContainer ref={navigationRef}>
@@ -250,6 +266,7 @@ export default function Navigation({
                 hybridAnalysis={hybridAnalysis}
                 websiteAnalysis={websiteAnalysis}
                 socialAnalysis={socialAnalysis}
+                trophyHook={trophyHook}
               />
             )}
           </Stack.Screen>

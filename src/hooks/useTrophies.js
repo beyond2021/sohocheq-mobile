@@ -517,14 +517,14 @@ export function useTrophies(
             .eq("user_id", user.id)
             .order("earned_at", { ascending: false }),
           supabase
-            .from("user_streaks")
+            .from("user_profiles")
             .select(
               "current_streak, longest_streak, last_check_date, streak_label",
             )
             .eq("user_id", user.id)
             .single(),
           supabase
-            .from("user_analyses")
+            .from("analysis_history")
             .select(
               "id, score, previous_score, social_data, analyzed_at, persona, level",
             )
@@ -539,7 +539,7 @@ export function useTrophies(
             .eq("user_id", user.id)
             .single(),
           supabase
-            .from("user_analyses")
+            .from("analysis_history")
             .select("*", { count: "exact", head: true })
             .eq("user_id", user.id),
         ]);
@@ -596,7 +596,7 @@ export function useTrophies(
         updated_at: new Date().toISOString(),
       };
       await supabase
-        .from("user_streaks")
+        .from("user_profiles")
         .upsert(streakData, { onConflict: "user_id" });
       setStreak(streakData);
       return { newStreak, streakLabel };
@@ -641,7 +641,7 @@ export function useTrophies(
         ? (profile?.analysis_count_today || 0) + 1
         : 1;
 
-      await supabase.from("user_analyses").insert({
+      await supabase.from("analysis_history").insert({
         user_id: user.id,
         url,
         score,

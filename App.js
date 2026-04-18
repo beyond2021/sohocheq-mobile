@@ -22,6 +22,8 @@ export default function App() {
   const hybridAnalysis = useAnalysis();
   const websiteAnalysis = useAnalysis();
   const socialAnalysis = useAnalysis();
+
+  //created here 
   const trophyHook = useTrophies(
     authHook.user,
     hybridAnalysis,

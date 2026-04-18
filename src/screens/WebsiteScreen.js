@@ -15,11 +15,18 @@ import { globalStyles } from "../styles";
 import AnimatedInput from "../components/AnimatedInput";
 import SkeletonCard from "../components/SkeletonCard";
 import AnimatedBackground from "../components/AnimatedBackground";
+import TrophyModal from "../components/TrophyModal";
 
-export default function WebsiteScreen({ navigation, analysisHook, authHook }) {
+export default function WebsiteScreen({
+  navigation,
+  analysisHook,
+  authHook,
+  trophyHook,
+}) {
   const [url, setUrl] = useState("");
   const { analyze, loading, result, error, ready, step, reset } = analysisHook;
   const { user, displayName, profile } = authHook;
+  const trophies = trophyHook?.trophies || [];
   useEffect(() => {
     if (profile) {
       if (profile.website_url) setUrl(profile.website_url);
@@ -29,6 +36,7 @@ export default function WebsiteScreen({ navigation, analysisHook, authHook }) {
   useEffect(() => {
     if (ready === true && result !== null) navigation.navigate("Results");
   }, [ready, result]);
+  const [showTrophies, setShowTrophies] = useState(false);
 
   const handleAnalyze = () => {
     const trimmedUrl = url.trim();
@@ -130,6 +138,24 @@ export default function WebsiteScreen({ navigation, analysisHook, authHook }) {
         {user && (
           <Text style={globalStyles.greeting}>Hey {displayName} 👋</Text>
         )}
+        {trophies.length > 0 && (
+          <TouchableOpacity
+            onPress={() => setShowTrophies(true)}
+            style={{ flexDirection: "row", gap: 6, marginBottom: 16 }}
+          >
+            {trophies.slice(0, 6).map((t) => (
+              <Text key={t.key} style={{ fontSize: 22 }}>
+                {t.emoji}
+              </Text>
+            ))}
+          </TouchableOpacity>
+        )}
+        <TrophyModal
+          visible={showTrophies}
+          onClose={() => setShowTrophies(false)}
+          trophies={trophies}
+        />
+
         <View style={globalStyles.hero}>
           <Text style={globalStyles.eyebrow}>Website Analysis</Text>
           <Text style={globalStyles.heroTitle}>

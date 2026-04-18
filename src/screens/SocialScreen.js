@@ -16,6 +16,7 @@ import { globalStyles } from "../styles";
 import AnimatedInput from "../components/AnimatedInput";
 import SkeletonCard from "../components/SkeletonCard";
 import AnimatedBackground from "../components/AnimatedBackground";
+import TrophyModal from "../components/TrophyModal";
 
 const { width } = Dimensions.get("window");
 
@@ -201,7 +202,12 @@ function PlatformCard({
   );
 }
 
-export default function SocialScreen({ navigation, analysisHook, authHook }) {
+export default function SocialScreen({
+  navigation,
+  analysisHook,
+  authHook,
+  trophyHook,
+}) {
   const [twitter, setTwitter] = useState("");
   const [instagram, setInstagram] = useState("");
   const [tiktok, setTiktok] = useState("");
@@ -209,6 +215,7 @@ export default function SocialScreen({ navigation, analysisHook, authHook }) {
 
   const { analyze, loading, result, error, ready, reset, step } = analysisHook;
   const { user, displayName, profile } = authHook;
+  const trophies = trophyHook?.trophies || [];
 
   const social = result?.social;
   useEffect(() => {
@@ -246,6 +253,8 @@ export default function SocialScreen({ navigation, analysisHook, authHook }) {
     setTiktok("");
     setYoutube("");
   };
+
+  const [showTrophies, setShowTrophies] = useState(false);
 
   if (loading) {
     return (
@@ -494,6 +503,24 @@ export default function SocialScreen({ navigation, analysisHook, authHook }) {
         {user && (
           <Text style={globalStyles.greeting}>Hey {displayName} 👋</Text>
         )}
+
+        {trophies.length > 0 && (
+          <TouchableOpacity
+            onPress={() => setShowTrophies(true)}
+            style={{ flexDirection: "row", gap: 6, marginBottom: 16 }}
+          >
+            {trophies.slice(0, 6).map((t) => (
+              <Text key={t.key} style={{ fontSize: 22 }}>
+                {t.emoji}
+              </Text>
+            ))}
+          </TouchableOpacity>
+        )}
+        <TrophyModal
+          visible={showTrophies}
+          onClose={() => setShowTrophies(false)}
+          trophies={trophies}
+        />
 
         <View style={globalStyles.hero}>
           <Text style={globalStyles.eyebrow}>Social Analysis</Text>

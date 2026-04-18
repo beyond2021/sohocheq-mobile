@@ -17,8 +17,14 @@ import AnimatedBackground from "../components/AnimatedBackground";
 import BottomModal from "../components/BottomModal";
 import DailyBriefCard from "../components/DailyBriefCard";
 import { useDailyBrief } from "../hooks/useDailyBrief";
+import TrophyModal from "../components/TrophyModal";
 
-export default function HybridScreen({ navigation, analysisHook, authHook }) {
+export default function HybridScreen({
+  navigation,
+  analysisHook,
+  authHook,
+  trophyHook,
+}) {
   const [url, setUrl] = useState("");
   const [twitter, setTwitter] = useState("");
   const [instagram, setInstagram] = useState("");
@@ -31,6 +37,9 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
 
   const briefHook = useDailyBrief(user, isPremium, isProfessional);
   const hasUnread = briefHook.brief && !briefHook.hasRead;
+
+  // 2. Get trophies from hook
+  const trophies = trophyHook?.trophies || [];
 
   useEffect(() => {
     if (profile) {
@@ -45,6 +54,8 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
   useEffect(() => {
     if (ready === true && result !== null) navigation.navigate("Results");
   }, [ready, result]);
+
+  const [showTrophies, setShowTrophies] = useState(false);
 
   const handleAnalyze = () => {
     const trimmedUrl = url.trim();
@@ -144,11 +155,26 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
             </View>
           )}
         </View>
-
         {user && (
           <Text style={globalStyles.greeting}>Hey {displayName} 👋</Text>
         )}
-
+        {trophies.length > 0 && (
+          <TouchableOpacity
+            onPress={() => setShowTrophies(true)}
+            style={{ flexDirection: "row", gap: 6, marginBottom: 16 }}
+          >
+            {trophies.slice(0, 6).map((t) => (
+              <Text key={t.key} style={{ fontSize: 22 }}>
+                {t.emoji}
+              </Text>
+            ))}
+          </TouchableOpacity>
+        )}
+        <TrophyModal
+          visible={showTrophies}
+          onClose={() => setShowTrophies(false)}
+          trophies={trophies}
+        />
         <View style={globalStyles.hero}>
           <Text style={globalStyles.eyebrow}>Complete Analysis</Text>
           <Text style={globalStyles.heroTitle}>
@@ -158,7 +184,6 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
             AI-powered analysis for brands that move fast
           </Text>
         </View>
-
         <AnimatedInput
           label="Website URL"
           value={url}
@@ -195,9 +220,7 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
           placeholder="handle"
           icon="▶️"
         />
-
         {error && <Text style={globalStyles.error}>{error}</Text>}
-
         <TouchableOpacity
           onPress={handleAnalyze}
           disabled={loading}
@@ -205,7 +228,6 @@ export default function HybridScreen({ navigation, analysisHook, authHook }) {
         >
           <Text style={globalStyles.btnText}>Analyze →</Text>
         </TouchableOpacity>
-
         <Text style={globalStyles.ticker}>
           Social media earnings calculator · Influencer earnings per post
         </Text>
