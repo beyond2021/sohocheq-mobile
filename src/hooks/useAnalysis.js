@@ -15,15 +15,26 @@ export function useAnalysis() {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      console.log("🔑 Token:", session?.access_token ? "EXISTS" : "MISSING");
-      return session?.access_token || null;
+      if (session?.access_token) return session.access_token;
+
+      // Fallback — refresh the session
+      const {
+        data: { session: refreshed },
+      } = await supabase.auth.refreshSession();
+      console.log("🔑 Token:", refreshed?.access_token ? "EXISTS" : "MISSING");
+      return refreshed?.access_token || null;
     } catch (e) {
       console.error("❌ Token error:", e);
       return null;
     }
   };
 
-  const analyze = async ({ url, twitter, instagram, tiktok, youtube }, trophyHook) => {
+  const analyze = async (
+    { url, twitter, instagram, tiktok, youtube },
+    accessToken,
+    trophyHook,
+  ) => {
+    const token = accessToken || (await getToken());
     console.log("🤣 Hybrid is analyzing");
 
     setLoading(true);
@@ -40,7 +51,6 @@ export function useAnalysis() {
       setProgress(30);
       setStep("Analyzing SEO score...");
 
-      const token = await getToken();
       const authHeaders = {
         "Content-Type": "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -173,7 +183,8 @@ export function useAnalysis() {
       setProgress(100);
       setStep("Analysis complete!");
       setResult({ seo: seoData, social: socialData, url: cleanUrl });
-      if (trophyHook) await trophyHook.saveAnalysis(seoData, socialData, cleanUrl);
+      if (trophyHook)
+        await trophyHook.saveProgress(seoData, socialData, cleanUrl);
       setReady(true);
     } catch (e) {
       setError(e.message || "Analysis failed. Please try again.");

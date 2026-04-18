@@ -33,7 +33,8 @@ export default function HybridScreen({
   const [showBrief, setShowBrief] = useState(false);
 
   const { analyze, loading, result, error, ready, step } = analysisHook;
-  const { user, displayName, profile, isPremium, isProfessional } = authHook;
+  const { user, displayName, profile, isPremium, isProfessional, session } =
+    authHook;
 
   const briefHook = useDailyBrief(user, isPremium, isProfessional);
   const hasUnread = briefHook.brief && !briefHook.hasRead;
@@ -60,7 +61,11 @@ export default function HybridScreen({
   const handleAnalyze = () => {
     const trimmedUrl = url.trim();
     if (!trimmedUrl) return;
-    analyze({ url: trimmedUrl, twitter, instagram, tiktok, youtube });
+    analyze(
+      { url: trimmedUrl, twitter, instagram, tiktok, youtube },
+      session?.access_token,
+      trophyHook,
+    );
   };
 
   if (loading) {

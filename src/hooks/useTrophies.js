@@ -790,6 +790,7 @@ export function useTrophies(
     loading,
     updateProfile,
     loadData,
+    saveProgress,
     TROPHY_DEFINITIONS,
     LEVELS,
     PERSONAS,
