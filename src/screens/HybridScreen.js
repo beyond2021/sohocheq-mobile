@@ -18,6 +18,8 @@ import BottomModal from "../components/BottomModal";
 import DailyBriefCard from "../components/DailyBriefCard";
 import { useDailyBrief } from "../hooks/useDailyBrief";
 import TrophyModal from "../components/TrophyModal";
+import HistoryContent from "../components/HistoryContent";
+import { useHistory } from "../hooks/useHistory";
 
 export default function HybridScreen({
   navigation,
@@ -41,6 +43,9 @@ export default function HybridScreen({
 
   // 2. Get trophies from hook
   const trophies = trophyHook?.trophies || [];
+
+  const historyHook = useHistory(user, isPremium, isProfessional);
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -226,6 +231,7 @@ export default function HybridScreen({
           icon="▶️"
         />
         {error && <Text style={globalStyles.error}>{error}</Text>}
+        {/* Error View */}
         <TouchableOpacity
           onPress={handleAnalyze}
           disabled={loading}
@@ -237,6 +243,19 @@ export default function HybridScreen({
           Social media earnings calculator · Influencer earnings per post
         </Text>
       </ScrollView>
+
+      {user && (
+        <TouchableOpacity
+          style={[styles.floatingBtn, { bottom: 96 }]}
+          onPress={() => {
+            historyHook.fetchHistory();
+            setShowHistory(true);
+          }}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.floatingIcon}>🕐</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Floating Daily Brief Button */}
       {user && briefHook.brief && (
@@ -257,6 +276,20 @@ export default function HybridScreen({
         title="Daily Intel"
       >
         <DailyBriefCard briefHook={briefHook} />
+      </BottomModal>
+
+      <BottomModal
+        visible={showHistory}
+        onClose={() => setShowHistory(false)}
+        title="Analysis History"
+      >
+        <HistoryContent
+          historyHook={historyHook}
+          onReanalyze={(url) => {
+            setUrl(url);
+            setShowHistory(false);
+          }}
+        />
       </BottomModal>
     </KeyboardAvoidingView>
   );
