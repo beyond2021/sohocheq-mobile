@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 
 export const TROPHY_DEFINITIONS = [
-  // Website trophies
   {
     key: "speed_demon",
     name: "Speed Demon",
@@ -45,8 +44,6 @@ export const TROPHY_DEFINITIONS = [
     description: "Overall score 100",
     category: "website",
   },
-
-  // Social trophies
   {
     key: "first_1k",
     name: "First 1K",
@@ -117,8 +114,6 @@ export const TROPHY_DEFINITIONS = [
     description: "Grew followers 10% since last check",
     category: "social",
   },
-
-  // Growth trophies
   {
     key: "first_analysis",
     name: "First Check",
@@ -147,8 +142,6 @@ export const TROPHY_DEFINITIONS = [
     description: "Score improved 20+ points in one check",
     category: "progress",
   },
-
-  // Streak trophies
   {
     key: "on_fire",
     name: "On Fire",
@@ -255,14 +248,16 @@ export const LEVELS = [
   { level: 7, label: "Legendary", min: 96, max: 100 },
 ];
 
+const num = (val) => parseFloat(val) || 0;
+
 export function calculateScore(seo, social) {
   if (seo && social) {
     const websiteHealth =
-      (seo.technical?.performance || 0) * 0.3 +
-      (seo.technical?.mobile || 0) * 0.25 +
-      (seo.technical?.security || 0) * 0.2 +
-      (seo.score || 0) * 0.15 +
-      (seo.technical?.accessibility || 0) * 0.1;
+      num(seo.technical?.performance) * 0.3 +
+      num(seo.technical?.mobile) * 0.25 +
+      num(seo.technical?.security) * 0.2 +
+      num(seo.score) * 0.15 +
+      num(seo.technical?.accessibility) * 0.1;
     const platforms = Object.values(social);
     const maxFollowers = Math.max(
       ...platforms.map(
@@ -277,11 +272,11 @@ export function calculateScore(seo, social) {
   }
   if (seo && !social) {
     return Math.round(
-      (seo.technical?.performance || 0) * 0.3 +
-        (seo.technical?.mobile || 0) * 0.25 +
-        (seo.technical?.security || 0) * 0.2 +
-        (seo.score || 0) * 0.15 +
-        (seo.technical?.accessibility || 0) * 0.1,
+      num(seo.technical?.performance) * 0.3 +
+        num(seo.technical?.mobile) * 0.25 +
+        num(seo.technical?.security) * 0.2 +
+        num(seo.score) * 0.15 +
+        num(seo.technical?.accessibility) * 0.1,
     );
   }
   if (social && !seo) {
@@ -371,7 +366,6 @@ function evaluateTrophies(
   const tech = seo?.technical || {};
   const vitals = seo?.coreWebVitals || {};
 
-  // Website trophies
   if (vitals.lcp?.displayValue && parseFloat(vitals.lcp.displayValue) < 2.5)
     earned.push("speed_demon");
   if (tech.security >= 100) earned.push("fort_knox");
@@ -380,20 +374,16 @@ function evaluateTrophies(
   if (tech.performance >= 90) earned.push("rocket_ship");
   if ((seo?.score || 0) >= 100) earned.push("perfect_score");
 
-  // Score jump
-  if (previousScore !== null && seo?.score && seo.score - previousScore >= 20) {
+  if (previousScore !== null && seo?.score && seo.score - previousScore >= 20)
     earned.push("big_jump");
-  }
 
   if (social) {
     const platforms = Object.values(social);
-
     const maxFollowers = Math.max(
       ...platforms.map(
         (p) => p.profileData?.followers || p.followers || p.subscribers || 0,
       ),
     );
-
     const activePlatforms = platforms.filter((p) => p.exists !== false);
     const activePlatformCount = activePlatforms.length;
     const verifiedPlatforms = activePlatforms.filter((p) => p.verified);
@@ -402,25 +392,20 @@ function evaluateTrophies(
       activePlatformCount > 0 &&
       verifiedPlatforms.length === activePlatformCount;
 
-    // Follower milestones
     if (maxFollowers >= 1000) earned.push("first_1k");
     if (maxFollowers >= 10000) earned.push("ten_k_club");
     if (maxFollowers >= 100000) earned.push("hundred_k");
     if (maxFollowers >= 1000000) earned.push("million_club");
-
-    // Platform trophies
     if (activePlatformCount >= 3) earned.push("multi_platform");
     if (isAnyVerified) earned.push("verified");
     if (isAllVerified && activePlatformCount >= 2) earned.push("full_house");
 
-    // Engagement rate — Instagram specific
     const ig = social.instagram;
     if (ig?.engagement?.engagementRate) {
       const rate = parseFloat(ig.engagement.engagementRate);
       if (rate >= 5) earned.push("engagement_king");
     }
 
-    // Content machine — 100+ posts on any platform
     const maxPosts = Math.max(
       social.instagram?.posts || 0,
       social.twitter?.tweets || 0,
@@ -429,7 +414,6 @@ function evaluateTrophies(
     );
     if (maxPosts >= 100) earned.push("content_machine");
 
-    // Growing fast — 10% follower growth since last check
     if (previousSocial) {
       const prevPlatforms = Object.values(previousSocial);
       const prevMaxFollowers = Math.max(
@@ -437,13 +421,11 @@ function evaluateTrophies(
           (p) => p.profileData?.followers || p.followers || p.subscribers || 0,
         ),
       );
-      if (prevMaxFollowers > 0 && maxFollowers >= prevMaxFollowers * 1.1) {
+      if (prevMaxFollowers > 0 && maxFollowers >= prevMaxFollowers * 1.1)
         earned.push("growing_fast");
-      }
     }
   }
 
-  // Progress trophies
   if (savedCount === 1) earned.push("first_analysis");
   if (savedCount >= 5) earned.push("five_saves");
   if (savedCount >= 10) earned.push("ten_saves");
@@ -469,7 +451,6 @@ export function useTrophies(
     if (user) loadData();
   }, [user?.id]);
 
-  // Watch all three analysis hooks
   useEffect(() => {
     if (hybridAnalysis?.ready && hybridAnalysis?.result) {
       handleResult(
@@ -524,12 +505,10 @@ export function useTrophies(
             .eq("user_id", user.id)
             .single(),
           supabase
-            .from("analysis_history")
-            .select(
-              "id, score, previous_score, social_data, analyzed_at, persona, level",
-            )
+            .from("seo_analysis_history")
+            .select("id, url, score, analysis_data, created_at")
             .eq("user_id", user.id)
-            .order("analyzed_at", { ascending: false })
+            .order("created_at", { ascending: false })
             .limit(1),
           supabase
             .from("user_profiles")
@@ -539,12 +518,11 @@ export function useTrophies(
             .eq("user_id", user.id)
             .single(),
           supabase
-            .from("analysis_history")
+            .from("seo_analysis_history")
             .select("*", { count: "exact", head: true })
             .eq("user_id", user.id),
         ]);
 
-      // Merge trophy keys with app definitions
       const earned = (trophyRes.data || [])
         .map((row) => ({
           ...TROPHY_DEFINITIONS.find((d) => d.key === row.trophy_key),
@@ -634,59 +612,50 @@ export function useTrophies(
 
       console.log("💾 Saving meaningful progress — score:", score);
 
-      // Update daily count
       const today = new Date().toISOString().split("T")[0];
       const isToday = profile?.last_analysis_date === today;
       const newDailyCount = isToday
         ? (profile?.analysis_count_today || 0) + 1
         : 1;
 
-      await supabase.from("analysis_history").insert({
-        user_id: user.id,
-        url,
-        score,
-        previous_score: previousScore,
-        score_delta: previousScore !== null ? score - previousScore : 0,
-        seo_data: seo,
-        social_data: social,
-        persona: persona.key,
-        level: level.level,
-        level_label: level.label,
-        is_hybrid: !!(seo && social),
-        is_website_only: !!(seo && !social),
-        is_social_only: !!(!seo && social),
-      });
+      // Save to seo_analysis_history (same table as website)
+      if (seo) {
+        await supabase.from("seo_analysis_history").insert({
+          user_id: user.id,
+          url,
+          score: calculateScore(seo, null),
+          analysis_data: seo,
+          created_at: new Date().toISOString(),
+        });
+      }
+
+      // Save to social_analysis_history (same table as website)
+      if (social) {
+        const handle =
+          social.instagram?.handle ||
+          social.twitter?.handle ||
+          social.tiktok?.handle ||
+          social.youtube?.handle ||
+          null;
+        await supabase.from("social_analysis_history").insert({
+          user_id: user.id,
+          handles: handle,
+          social_score: calculateScore(null, social),
+          social_data: social,
+          created_at: new Date().toISOString(),
+        });
+      }
 
       const newCount = savedCount + 1;
       setSavedCount(newCount);
       setLastAnalysis({ score, social_data: social });
 
       // Award trophies
-      // if (newDefs.length > 0) {
-      //   const inserts = newDefs.map((d) => ({
-      //     user_id: user.id,
-      //     trophy_key: d.key,
-      //     trophy_name: d.name,
-      //     trophy_emoji: d.emoji,
-      //     trophy_description: d.description,
-      //   }));
-      //   const { data: awarded } = await supabase
-      //     .from("user_trophies")
-      //     .upsert(inserts, { onConflict: "user_id,trophy_key" })
-      //     .select();
-      //   if (awarded?.length > 0) {
-      //     setTrophies((prev) => [...awarded, ...prev]);
-      //     setNewTrophies(awarded);
-      //     setTimeout(() => setNewTrophies([]), 5000);
-      //   }
-      // }
-
       if (newDefs.length > 0) {
         const inserts = newDefs.map((d) => ({
           user_id: user.id,
           trophy_key: d.key,
         }));
-
         const { data: awarded, error } = await supabase
           .from("user_trophies")
           .upsert(inserts, { onConflict: "user_id,trophy_key" })
@@ -701,7 +670,6 @@ export function useTrophies(
               earned_at: row.earned_at,
             }))
             .filter(Boolean);
-
           setTrophies((prev) => [...newEarned, ...prev]);
           setNewTrophies(newEarned);
           setTimeout(() => setNewTrophies([]), 5000);
@@ -766,14 +734,16 @@ export function useTrophies(
 
   const updateProfile = async (updates) => {
     try {
-      await supabase.from("user_profiles").upsert(
-        {
-          user_id: user.id,
-          ...updates,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id" },
-      );
+      await supabase
+        .from("user_profiles")
+        .upsert(
+          {
+            user_id: user.id,
+            ...updates,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id" },
+        );
       setProfile((prev) => ({ ...prev, ...updates }));
     } catch (e) {
       console.error("❌ Update profile error:", e);
