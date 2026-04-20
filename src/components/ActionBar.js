@@ -1,58 +1,58 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import Svg, { Path, Circle, Rect } from "react-native-svg";
 import { COLORS } from "../constants";
 import { LinearGradient } from "expo-linear-gradient";
-import { AIIcon, SocialReportIcon } from "./icons/TabIcons";
+import {
+  AIIcon,
+  SocialReportIcon,
+  GrowthIcon,
+  HistoryIcon,
+  BriefIcon,
+} from "./icons/TabIcons";
 
-function GrowthIcon({ color, size = 22 }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 32 32">
-      <Path
-        d="M4 24 L10 16 L16 20 L22 10 L28 6"
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path
-        d="M22 6 L28 6 L28 12"
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Circle cx="10" cy="16" r="2" fill={color} />
-      <Circle cx="16" cy="20" r="2" fill={color} />
-      <Circle cx="22" cy="10" r="2" fill={color} />
-    </Svg>
-  );
-}
-
-export default function ActionBar({ onAI, onSocial, onGrowth, hasSocial }) {
+export default function ActionBar({
+  onAI,
+  onSocial,
+  onGrowth,
+  hasSocial,
+  onHistory,
+  onBrief,
+  hasUnread,
+}) {
   const buttons = [
-    {
+    onGrowth && {
       label: "Growth",
       Icon: GrowthIcon,
       onPress: onGrowth,
       colors: ["#7c3aed", "#c026d3"],
     },
-    {
+    onAI && {
       label: "AI",
       Icon: AIIcon,
       onPress: onAI,
       colors: ["#a78bfa", "#7c3aed"],
     },
-    {
+    onSocial && {
       label: "Social",
       Icon: SocialReportIcon,
       onPress: onSocial,
       colors: hasSocial ? ["#e1306c", "#fd366e"] : ["#333", "#444"],
       disabled: !hasSocial,
     },
-  ];
+    onHistory && {
+      label: "History",
+      Icon: HistoryIcon,
+      onPress: onHistory,
+      colors: ["#0ea5e9", "#6366f1"],
+    },
+    onBrief && {
+      label: "Intel",
+      Icon: BriefIcon,
+      onPress: onBrief,
+      colors: ["#fd366e", "#c026d3"],
+      badge: hasUnread,
+    },
+  ].filter(Boolean);
 
   return (
     <View
@@ -91,6 +91,21 @@ export default function ActionBar({ onAI, onSocial, onGrowth, hasSocial }) {
             }}
           >
             <btn.Icon color="#fff" size={22} />
+            {btn.badge && (
+              <View
+                style={{
+                  position: "absolute",
+                  top: 6,
+                  right: 6,
+                  width: 10,
+                  height: 10,
+                  borderRadius: 5,
+                  backgroundColor: "#fff",
+                  borderWidth: 2,
+                  borderColor: btn.colors[0],
+                }}
+              />
+            )}
           </LinearGradient>
           <Text
             style={{

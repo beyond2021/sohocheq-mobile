@@ -273,3 +273,119 @@ export function SocialReportIcon({ color = "#e1306c", size = 26 }) {
     </Svg>
   );
 }
+
+// ── ActionBar Icons ────────────────────────────────────────────────
+
+export function GrowthIcon({ color = "#fd366e", size = 26 }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 32 32">
+      <Path
+        d="M4 24 L10 16 L16 20 L22 10 L28 6"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M22 6 L28 6 L28 12"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Circle cx="10" cy="16" r="2" fill={color} />
+      <Circle cx="16" cy="20" r="2" fill={color} />
+      <Circle cx="22" cy="10" r="2" fill={color} />
+    </Svg>
+  );
+}
+
+export function HistoryIcon({ color = "#fd366e", size = 26 }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 32 32">
+      <Circle
+        cx="16"
+        cy="16"
+        r="11"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+      />
+      <Path
+        d="M16 9 L16 16 L21 21"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M5 10 L8 7 L11 10"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M8 7 L8 12"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+export function BriefIcon({ color = "#fd366e", size = 26 }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 32 32">
+      <Path
+        d="M4 14 Q4 5 16 5 Q28 5 28 14"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <Path
+        d="M8 14 Q8 9 16 9 Q24 9 24 14"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <Path
+        d="M12 14 Q12 12 16 12 Q20 12 20 14"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <Circle
+        cx="16"
+        cy="18"
+        r="2"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+      />
+      <Path
+        d="M16 20 L16 26"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <Path
+        d="M12 26 L20 26"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}

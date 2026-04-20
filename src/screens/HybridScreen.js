@@ -7,7 +7,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
 } from "react-native";
 import { COLORS } from "../constants";
 import { globalStyles } from "../styles";
@@ -20,6 +19,7 @@ import { useDailyBrief } from "../hooks/useDailyBrief";
 import TrophyModal from "../components/TrophyModal";
 import HistoryContent from "../components/HistoryContent";
 import { useHistory } from "../hooks/useHistory";
+import ActionBar from "../components/ActionBar";
 
 export default function HybridScreen({
   navigation,
@@ -33,6 +33,8 @@ export default function HybridScreen({
   const [tiktok, setTiktok] = useState("");
   const [youtube, setYoutube] = useState("");
   const [showBrief, setShowBrief] = useState(false);
+  const [showTrophies, setShowTrophies] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const { analyze, loading, result, error, ready, step } = analysisHook;
   const { user, displayName, profile, isPremium, isProfessional, session } =
@@ -40,12 +42,8 @@ export default function HybridScreen({
 
   const briefHook = useDailyBrief(user, isPremium, isProfessional);
   const hasUnread = briefHook.brief && !briefHook.hasRead;
-
-  // 2. Get trophies from hook
   const trophies = trophyHook?.trophies || [];
-
   const historyHook = useHistory(user, isPremium, isProfessional);
-  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -60,8 +58,6 @@ export default function HybridScreen({
   useEffect(() => {
     if (ready === true && result !== null) navigation.navigate("Results");
   }, [ready, result]);
-
-  const [showTrophies, setShowTrophies] = useState(false);
 
   const handleAnalyze = () => {
     const trimmedUrl = url.trim();
@@ -165,9 +161,11 @@ export default function HybridScreen({
             </View>
           )}
         </View>
+
         {user && (
           <Text style={globalStyles.greeting}>Hey {displayName} 👋</Text>
         )}
+
         {trophies.length > 0 && (
           <TouchableOpacity
             onPress={() => setShowTrophies(true)}
@@ -180,11 +178,13 @@ export default function HybridScreen({
             ))}
           </TouchableOpacity>
         )}
+
         <TrophyModal
           visible={showTrophies}
           onClose={() => setShowTrophies(false)}
           trophies={trophies}
         />
+
         <View style={globalStyles.hero}>
           <Text style={globalStyles.eyebrow}>Complete Analysis</Text>
           <Text style={globalStyles.heroTitle}>
@@ -194,6 +194,7 @@ export default function HybridScreen({
             AI-powered analysis for brands that move fast
           </Text>
         </View>
+
         <AnimatedInput
           label="Website URL"
           value={url}
@@ -230,8 +231,9 @@ export default function HybridScreen({
           placeholder="handle"
           icon="▶️"
         />
+
         {error && <Text style={globalStyles.error}>{error}</Text>}
-        {/* Error View */}
+
         <TouchableOpacity
           onPress={handleAnalyze}
           disabled={loading}
@@ -239,34 +241,22 @@ export default function HybridScreen({
         >
           <Text style={globalStyles.btnText}>Analyze →</Text>
         </TouchableOpacity>
+
         <Text style={globalStyles.ticker}>
           Social media earnings calculator · Influencer earnings per post
         </Text>
       </ScrollView>
 
+      {/* ActionBar — History + Daily Brief */}
       {user && (
-        <TouchableOpacity
-          style={[styles.floatingBtn, { bottom: 96 }]}
-          onPress={() => {
+        <ActionBar
+          onHistory={() => {
             historyHook.fetchHistory();
             setShowHistory(true);
           }}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.floatingIcon}>🕐</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Floating Daily Brief Button */}
-      {user && briefHook.brief && (
-        <TouchableOpacity
-          style={styles.floatingBtn}
-          onPress={() => setShowBrief(true)}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.floatingIcon}>📡</Text>
-          {hasUnread && <View style={styles.unreadDot} />}
-        </TouchableOpacity>
+          onBrief={briefHook.brief ? () => setShowBrief(true) : null}
+          hasUnread={hasUnread}
+        />
       )}
 
       {/* Daily Brief Modal */}
@@ -278,6 +268,7 @@ export default function HybridScreen({
         <DailyBriefCard briefHook={briefHook} />
       </BottomModal>
 
+      {/* History Modal */}
       <BottomModal
         visible={showHistory}
         onClose={() => setShowHistory(false)}
@@ -285,8 +276,12 @@ export default function HybridScreen({
       >
         <HistoryContent
           historyHook={historyHook}
-          onReanalyze={(url) => {
-            setUrl(url);
+          onReanalyze={(item) => {
+            if (item.url) setUrl(item.url);
+            if (item.instagram) setInstagram(item.instagram);
+            if (item.twitter) setTwitter(item.twitter);
+            if (item.tiktok) setTiktok(item.tiktok);
+            if (item.youtube) setYoutube(item.youtube);
             setShowHistory(false);
           }}
         />
@@ -294,31 +289,3 @@ export default function HybridScreen({
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  floatingBtn: {
-    position: "absolute",
-    bottom: 32,
-    right: 20,
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "rgba(253,54,110,0.15)",
-    borderWidth: 1,
-    borderColor: "rgba(253,54,110,0.4)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  floatingIcon: { fontSize: 22 },
-  unreadDot: {
-    position: "absolute",
-    top: 6,
-    right: 6,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#fd366e",
-    borderWidth: 2,
-    borderColor: "#0d0d14",
-  },
-});

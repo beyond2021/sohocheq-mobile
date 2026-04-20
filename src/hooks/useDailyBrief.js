@@ -21,26 +21,15 @@ export function useDailyBrief(user, isPremium, isProfessional) {
   const fetchBrief = async () => {
     setLoading(true);
     try {
-      // Get today's brief
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("daily_briefs")
         .select("*")
-        .eq("date", today)
+        .order("date", { ascending: false })
+        .limit(1)
         .single();
 
-      if (data) {
-        setBrief(data);
-      } else {
-        // Trigger generation if not yet created today
-        await supabase.functions.invoke("daily-brief");
-        // Fetch again after generation
-        const { data: fresh } = await supabase
-          .from("daily_briefs")
-          .select("*")
-          .eq("date", today)
-          .single();
-        if (fresh) setBrief(fresh);
-      }
+      console.log("📡 Brief data:", data?.id, "error:", error?.message);
+      if (data) setBrief(data);
     } catch (e) {
       console.error("❌ Daily brief fetch error:", e);
     } finally {
