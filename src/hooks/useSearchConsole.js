@@ -6,8 +6,11 @@ import { supabase } from "../lib/supabase";
 
 WebBrowser.maybeCompleteAuthSession();
 
+// const GSC_CLIENT_ID =
+//   "731483197307-6tl574r5ck3f8e3sl187iebm36rm8t8n.apps.googleusercontent.com";
+
 const GSC_CLIENT_ID =
-  "731483197307-6tl574r5ck3f8e3sl187iebm36rm8t8n.apps.googleusercontent.com";
+  "289638667387-ivdh0543fh7sb33f6tqufui30qje4s7n.apps.googleusercontent.com";
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 const discovery = {
@@ -21,11 +24,13 @@ export function useSearchConsole(user, siteUrl) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
-  const redirectUri = AuthSession.makeRedirectUri({
-    useProxy: true,
-    projectNameForProxy: "@beyond2021/sohocheq-mobile",
-    scheme: "sohocheq",
-  });
+  // const redirectUri = AuthSession.makeRedirectUri({
+  //   useProxy: true,
+  //   projectNameForProxy: "@beyond2021/sohocheq-mobile",
+
+  // });
+
+  const redirectUri = "https://auth.expo.io/@beyond2021/sohocheq-mobile";
   console.log("🔑 Redirect URI:", redirectUri);
 
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
